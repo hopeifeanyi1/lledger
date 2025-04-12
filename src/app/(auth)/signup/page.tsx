@@ -21,9 +21,9 @@ const SignupPage = () => {
   };
 
   return (
-    <div className='px-4 sm:px-6 md:px-[10vw] flex flex-col md:flex-row justify-between min-h-screen md:h-screen items-center py-8 md:py-0'>
+    <div className='px-4 sm:px-6 md:px-[8vw] flex flex-col md:flex-row justify-between min-h-screen md:h-screen items-center py-8 md:py-0'>
       <div className='hidden md:block'>
-        <Image src={Intro} alt='Welcome illustration' />
+        <Image src={Intro} alt='Welcome illustration' className='h-[82dvh] w-auto'/>
       </div>
       
       <div className='w-full max-w-[420px] md:w-[420px]'>
@@ -108,7 +108,7 @@ const SignupPage = () => {
           </button>
         </form>
         
-        <p className='text-center text-xs md:text-sm mt-4 md:mt-6'>
+        <p className='text-center text-xs md:text-sm mt-4 md:mt-5'>
           Already have an account?{' '}
           <a href='/login' className='text-[#D1376A] hover:text-[#D1376A]/80 font-medium'>
             Log in
