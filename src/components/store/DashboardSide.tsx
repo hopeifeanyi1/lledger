@@ -27,8 +27,8 @@ const DashboardSide = () => {
 
   const renderLink = (item: SideNavItem, inMobileView: boolean = false) => {
     const linkContent = (
-      <div className={`flex items-center font-medium hover:bg-secondary/70 px-3 py-2 rounded-md transition-colors ${
-        item.path === pathname ? 'bg-secondary text-primary' : 'text-foreground'
+      <div className={`flex items-center font-medium hover:bg-secondary/70 px-3 py-2 rounded-md transition-colors  ${
+        item.path === pathname ? 'text-[#D1376A]' : 'text-foreground'
       }`}>
         <span className="mr-3">{item.icon}</span>
         <span className="font-normal">{item.title}</span>
@@ -55,7 +55,7 @@ const DashboardSide = () => {
         <Link 
           href={item.path} 
           className={`flex items-center font-medium hover:bg-secondary/70 px-3 py-2 rounded-md transition-colors ${
-            isPathActive(item.path) ? 'bg-secondary text-primary' : 'text-foreground'
+            isPathActive(item.path) ? 'bg-secondary text-[#D1376A]' : 'text-foreground'
           }`} 
           onClick={() => handleLinkClick(item)}
         >
@@ -68,7 +68,7 @@ const DashboardSide = () => {
         <Link
           href={item.path}
           className={`flex items-center font-medium hover:bg-secondary/70 px-3 py-2 rounded-md transition-colors ${
-            item.path === pathname ? 'bg-secondary text-primary' : 'text-foreground'
+            item.path === pathname ? 'bg-secondary text-[#D1376A]' : 'text-foreground'
           }`}
         >
           <span className="mr-3">{item.icon}</span>
@@ -84,7 +84,7 @@ const DashboardSide = () => {
       <div className='w-[220px] h-[calc(100vh-50px)] flex-col justify-between hidden lg:flex '>
         <div>
           <div className="mt-5">
-            <h1 className="text-3xl font-semibold text-[#3823ae] mb-[100px]">Career<span className="text-foreground">ly</span></h1>
+            <h1 className="text-2xl font-semibold text-[#D1376A] mb-[100px]">Life<span className="text-foreground">Ledger</span></h1>
             <nav className="flex-1 flex flex-col justify-between">
               <div className="flex flex-col space-y-6">
                 {regularLinks.map((item) => renderLink(item))}
@@ -112,7 +112,7 @@ const DashboardSide = () => {
             </SheetHeader>
             
             <div className="">
-              <h1 className="text-3xl font-semibold text-[#3823ae] mb-16">Career<span className="text-foreground">ly</span></h1>
+              <h1 className="text-2xl font-semibold text-[#D1376A] mb-16">Life<span className="text-foreground">Ledger</span></h1>
               <nav className="flex-1 flex flex-col justify-between">
                 <div className="flex flex-col space-y-8">
                   {regularLinks.map((item) => renderLink(item, true))}
