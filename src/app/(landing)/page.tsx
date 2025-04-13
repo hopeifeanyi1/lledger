@@ -16,7 +16,15 @@ function useScrollAnimation() {
 }
 
 // Custom component for animated elements
-const AnimateOnScroll = ({ children, delay = 0, className = "" }) => {
+const AnimateOnScroll = ({ 
+  children, 
+  delay = 0, 
+  className = "" 
+}: { 
+  children: React.ReactNode; 
+  delay?: number; 
+  className?: string 
+}) => {
   const controls = useRef(null);
   const animation = useScrollAnimation();
   

@@ -7,6 +7,19 @@ export const Bars : React.FC<IconProps> = ({className}) => {
       </svg>      
     );
   };
+export const Back : React.FC<IconProps> = ({className}) => {
+    return (
+        <svg width="46" height="46" viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+        <mask id="mask0_46_165" maskUnits="userSpaceOnUse" x="0" y="0" width="46" height="46">
+        <rect width="45.8975" height="45.8975" fill="#D9D9D9"/>
+        </mask>
+        <g mask="url(#mask0_46_165)">
+        <path d="M21.0363 34.4231L9.56197 22.9487L21.0363 11.4744L23.7137 14.1517L14.9645 22.9487L23.7137 31.7457L21.0363 34.4231ZM33.6581 34.4231L22.1838 22.9487L33.6581 11.4744L36.3355 14.1517L27.5863 22.9487L36.3355 31.7457L33.6581 34.4231Z" fill="#1C1B1F"/>
+        </g>
+        </svg>
+    
+    );
+  };
 export const Google : React.FC<IconProps> = ({className}) => {
     return (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
