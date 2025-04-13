@@ -29,7 +29,7 @@ export default function DashboardLayout({
           <aside className="lg:block hidden">
             <DashboardSide />
           </aside>
-          <main className="flex-1 lg:w-[calc(100vw-220px)] h-full ">
+          <main className="flex-1 lg:w-[calc(100vw-220px)] h-full bg-surface">
             {children}
           </main>
         </div>

@@ -20,7 +20,7 @@ export function ThemeToggle() {
     <div className="flex items-center space-x-4">
       <button
         onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-        className="inline-flex items-center justify-center rounded-md p-2.5 text-sm font-medium bg-primary text-primary-foreground shadow hover:bg-primary/90"
+        className="inline-flex items-center justify-center rounded-md p-2 text-md font-medium bg-secondary text-primary-foreground shadow hover:bg-primary/90"
         aria-label="Toggle theme"
       >
         {theme === "dark" ? "☀️" : "🌙"}
