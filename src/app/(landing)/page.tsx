@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronRight, Brain, BarChart3, RefreshCw, CheckCircle, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 
 // Custom hook for animations on scroll
 function useScrollAnimation() {
@@ -67,9 +68,9 @@ export default function Home() {
           <a href="#how-it-works" className="text-black hover:text-[#D1376A] transition">How it works</a>
           <a href="#analytics" className="text-black hover:text-[#D1376A] transition">Analytics</a>
         </div>
-        <button className="bg-[#D1376A] text-white px-4 py-2 rounded-lg hover:bg-[#BB2C5E] transition">
+        <Link href='/signup' className="bg-[#D1376A] text-white px-4 py-2 rounded-lg hover:bg-[#BB2C5E] transition" >
           Get Started
-        </button>
+        </Link>
       </nav>
 
       {/* Hero Section */}
@@ -89,9 +90,9 @@ export default function Home() {
 
           <AnimateOnScroll delay={0.2}>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-              <button className="bg-[#D1376A] text-white px-6 py-3 rounded-lg hover:bg-[#BB2C5E] transition flex items-center justify-center gap-2">
+              <Link href='/signup' className="bg-[#D1376A] text-white px-6 py-3 rounded-lg hover:bg-[#BB2C5E] transition flex items-center justify-center gap-2">
                 Start for free <ChevronRight className="h-4 w-4" />
-              </button>
+              </Link>
               <button className="bg-white text-[#D1376A] border border-[#D1376A] px-6 py-3 rounded-lg hover:bg-gray-50 transition">
                 Watch demo
               </button>

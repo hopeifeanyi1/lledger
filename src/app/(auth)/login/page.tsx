@@ -20,7 +20,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div className='px-4 sm:px-6 md:px-[10vw] flex flex-col md:flex-row justify-between min-h-screen md:h-screen items-center py-8 md:py-0'>
+    <div className='bg-white text-black px-4 sm:px-6 md:px-[10vw] flex flex-col md:flex-row justify-between min-h-screen md:h-screen items-center py-8 md:py-0'>
       <div className='hidden md:block'>
         <Image src={Intro} alt='Welcome illustration' className='h-[82dvh] w-auto'/>
       </div>
