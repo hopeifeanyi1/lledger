@@ -1,25 +1,91 @@
 'use client'
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { Intro } from '../../../../public/svgs';
 import Logo from '@/components/store/Logo';
 import { Mail } from 'lucide-react';
 import { Google } from '@/components/store/Icon';
+import { supabase } from '@/lib/supabase';
 
 const SignupPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const router = useRouter();
 
-  const handleSubmit = (e: { preventDefault: () => void; }) => {
+  const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    // Check if passwords match
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/overview`,
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data.user) {
+        router.push('/overview');
+      }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      setError(error.message || 'Failed to sign up');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignup = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/overview`,
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      setError(error.message || 'Failed to sign up with Google');
+    }
   };
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
+    useEffect(() => {
+        const checkUser = async () => {
+        const { data } = await supabase.auth.getSession();
+        
+        if (data.session) {
+            router.push('/overview');
+        }
+        };
+    
+        checkUser();
+    }, [router]);
   return (
     <div className='bg-white text-black px-4 sm:px-6 md:px-[8vw] flex flex-col md:flex-row justify-between min-h-screen md:h-screen items-center py-8 md:py-0'>
       <div className='hidden md:block'>
@@ -34,8 +100,13 @@ const SignupPage = () => {
         <h1 className='text-xl md:text-2xl font-semibold mb-1 md:mb-1.5'>Create an Account</h1>
         <p className='text-black/80 text-sm md:text-md mb-4 md:mb-6'>Select method to sign up</p>
         
+        {error && <div className='mb-4 text-sm text-red-500'>{error}</div>}
+        
         <div className='mb-4 md:mb-6'>
-          <button className='w-full flex items-center justify-center gap-2 md:gap-3 py-2.5 md:py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition'>
+          <button 
+            className='w-full flex items-center justify-center gap-2 md:gap-3 py-2.5 md:py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition'
+            onClick={handleGoogleSignup}
+          >
             <Google/>
             <span>Continue with Google</span>
           </button>
@@ -93,9 +164,9 @@ const SignupPage = () => {
               type='checkbox'
               checked={showPassword}
               onChange={togglePasswordVisibility}
-              className='h-3 w-3 md:h-3.5 md:w-3.5 border-gray-300 rounded  accent-[#D1376A]'
+              className='h-3 w-3 md:h-3.5 md:w-3.5 border-gray-300 rounded accent-[#D1376A]'
             />
-            <label htmlFor='showPassword' className='ml-2 block text-xs md:text-sm text-gray-700 '>
+            <label htmlFor='showPassword' className='ml-2 block text-xs md:text-sm text-gray-700'>
               Show password
             </label>
           </div>
@@ -103,8 +174,9 @@ const SignupPage = () => {
           <button
             type='submit'
             className='w-full bg-[#D1376A] hover:bg-[#d1376a]/80 text-white font-medium py-2.5 md:py-3 rounded-lg transition text-sm md:text-base'
+            disabled={loading}
           >
-            Sign Up
+            {loading ? 'Signing up...' : 'Sign Up'}
           </button>
         </form>
         

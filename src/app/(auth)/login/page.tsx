@@ -1,18 +1,74 @@
 'use client'
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { Intro } from '../../../../public/svgs';
 import Logo from '@/components/store/Logo';
 import { Mail } from 'lucide-react';
 import { Google } from '@/components/store/Icon';
+import { supabase } from '@/lib/supabase';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const router = useRouter();
 
-  const handleSubmit = (e: { preventDefault: () => void; }) => {
+  const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data.user) {
+        router.push('/overview');
+      }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      setError(error.message || 'Failed to login');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+    useEffect(() => {
+    const checkUser = async () => {
+      const { data } = await supabase.auth.getSession();
+      
+      if (data.session) {
+        router.push('/overview');
+      }
+    };
+  
+    checkUser();
+  }, [router]);
+  const handleGoogleLogin = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/overview`,
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      setError(error.message || 'Failed to login with Google');
+    }
   };
 
   const togglePasswordVisibility = () => {
@@ -33,8 +89,13 @@ const LoginPage = () => {
         <h1 className='text-xl md:text-2xl font-semibold mb-1 md:mb-1.5'>Log in to your Account</h1>
         <p className='text-black/80 text-sm md:text-md mb-4 md:mb-10'>Welcome back, Select method to login</p>
         
+        {error && <div className='mb-4 text-sm text-red-500'>{error}</div>}
+        
         <div className='mb-4 md:mb-10'>
-          <button className='w-full flex items-center justify-center gap-2 md:gap-3 py-2.5 md:py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition'>
+          <button 
+            className='w-full flex items-center justify-center gap-2 md:gap-3 py-2.5 md:py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition'
+            onClick={handleGoogleLogin}
+          >
             <Google/>
             <span>Continue with Google</span>
           </button>
@@ -69,7 +130,7 @@ const LoginPage = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className='w-full py-2 px-3 md:px-4 border border-black/40 focus:border-black rounded-md text-sm md:text-base focus:outline-none transition-colors'
-              placeholder='Create Password'
+              placeholder='Password'
               required
             />
           </div>
@@ -88,7 +149,7 @@ const LoginPage = () => {
               </label>
             </div>
             
-            <a href='/signup' className='text-xs md:text-sm text-[#D1376A] hover:text-[#D1376A]/80 font-medium'>
+            <a href='/forgot-password' className='text-xs md:text-sm text-[#D1376A] hover:text-[#D1376A]/80 font-medium'>
               Forgot Password?
             </a>
           </div>
@@ -96,8 +157,9 @@ const LoginPage = () => {
           <button
             type='submit'
             className='w-full bg-[#D1376A] hover:bg-[#d1376a]/80 text-white font-medium py-2.5 md:py-3 rounded-lg transition text-sm md:text-base'
+            disabled={loading}
           >
-            Log in
+            {loading ? 'Logging in...' : 'Log in'}
           </button>
         </form>
         
