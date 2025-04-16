@@ -1,7 +1,7 @@
 //scr/constants/index.tsx
 'use client'
 import { SideNavItem } from "@/types";
-import { Dashboard, Insights, Settings, Logout, File, ChatLight, Edit } from "@/components/store/Icon";
+import { Dashboard, Settings, Logout, File, ChatLight, Edit } from "@/components/store/Icon";
 
 export const SIDENAV_ITEMS: SideNavItem[] = [
     {
@@ -30,19 +30,12 @@ export const SIDENAV_ITEMS: SideNavItem[] = [
     },
     {
       id: 5,
-      title: 'Insights',
-      path: '/insights',
-      icon: <Insights/>,
-    },
-    
-    {
-      id: 6,
       title: 'Settings',
       path: '/settings',
       icon: <Settings/>,
     },
     {
-      id: 7,
+      id: 6,
       title: 'Log out',
       path: '/',
       icon: <Logout/>,

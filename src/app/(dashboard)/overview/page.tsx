@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { Info } from 'lucide-react';
+import { Calendar } from "@/components/ui/calendar"
+import { Info, Bell } from 'lucide-react';
+import { format } from 'date-fns';
 
 // Define types for our data
 interface Decision {
@@ -67,11 +69,41 @@ const DecisionCard: React.FC<DecisionCardProps> = ({ decision }) => (
   </Card>
 );
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const UserAvatar: React.FC<{ user: any }> = ({ user }) => {
+  const getUserInitials = () => {
+    const name = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+    return name.split(' ')
+      .map((n: string) => n[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  };
+  
+  return (
+    <div className="rounded-full overflow-hidden border-4 border-[#D1376A] w-24 h-24">
+      {user?.user_metadata?.avatar_url ? (
+        <img 
+          src={user.user_metadata.avatar_url} 
+          alt="Profile picture" 
+          className="w-full h-full object-cover"
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-700">
+          <span className="text-xl font-bold">{getUserInitials()}</span>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const OverviewPage = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const [date, setDate] = React.useState<Date | undefined>(new Date())
+  const [today] = React.useState(new Date())
 
   useEffect(() => {
     const checkUser = async () => {
@@ -109,6 +141,7 @@ const OverviewPage = () => {
   }
 
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+  const userAge = user?.user_metadata?.age || '22'; // Fallback age if not provided
   
   // Determine outcome color based on percentage
   const getOutcomeColor = (percentage: number) => {
@@ -214,8 +247,53 @@ const OverviewPage = () => {
                 </Tabs>
             </div>
         </div>
+        {/* right content */}
         <div className='hidden md:block md:col-span-2'>
-        {/* Right column content */}
+          <div className='grid grid-cols-1 h-full gap-y-8'>
+            {/* Profile Card */}
+            <Card className="p-6 relative">
+              <div className="absolute top-6 right-6">
+                <div className="bg-[#D1376A] rounded-full w-10 h-10 flex items-center justify-center">
+                  <Bell className="text-white w-5 h-5" />
+                </div>
+              </div>
+              
+              <div className="flex items-center mt-4">
+                <div className="relative">
+                  <UserAvatar user={user} />
+                </div>
+                
+                <div className="ml-5">
+                  <div className="flex items-center">
+                    <h3 className="text-xl font-bold">{userName}</h3>
+                    <div className="w-1 h-1 rounded-full bg-[#D1376A] mx-3"></div>
+                    <span className="text-lg">{userAge} yrs</span>
+                  </div>
+                </div>
+              </div>
+            </Card>
+            
+            {/* Calendar Card */}
+            <Card className="p-6">
+              <CardContent className="p-0">
+                <div className="mb-4">
+                  <h3 className="text-lg font-medium">{format(today, 'MMMM d, yyyy')}</h3>
+                  <h2 className="text-2xl font-bold mt-2">Today</h2>
+                </div>
+                
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={setDate}
+                  className="w-full border-0 p-0"
+                  classNames={{
+                    day_selected: "bg-[#D1376A] text-white hover:bg-[#D1376A] hover:text-white focus:bg-[#D1376A] focus:text-white",
+                    day_today: "bg-[#D1376A]/20 text-[#D1376A]"
+                  }}
+                />
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
