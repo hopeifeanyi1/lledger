@@ -4,7 +4,8 @@ import { SendIcon } from "./Icon";
 import { useChat } from 'ai/react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { LoaderCircle, Briefcase, BookOpen, Award, Pencil, X, Check, Mic, Volume2, AudioLines } from "lucide-react";
+import { LoaderCircle, Briefcase, BookOpen, Award, Pencil, X, Check, Mic, Volume2, AudioLines, StopCircle } from "lucide-react";
+import { useVoiceService } from "./VoiceService";
 
 const ChatInterface = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -34,6 +35,13 @@ const ChatInterface = () => {
     onError: (err) => {
       console.error('Chat Error:', err);
     }
+  });
+
+  const voiceService = useVoiceService({
+    messages,
+    setMessages,
+    input,
+    handleInputChange
   });
 
   useEffect(() => {
@@ -338,17 +346,28 @@ const ChatInterface = () => {
             ref={textAreaRef}
             value={input}
             onChange={handleInput}
-            placeholder="Ask about careers, skills, or job preparation..."
+            placeholder="Type your thoughts..."
             className="pl-2 lg:mr-5 mr-2 outline-none w-full resize-none bg-transparent max-h-[180px] overflow-y-hidden py-3 lg:text-md text-sm"
             rows={1}
+            disabled={isLoading || voiceService.isRecording || voiceService.isProcessingVoice}
           />
 
-          <button
+        <button
             type="button"
-            className={`rounded-full w-10 h-10 flex items-center justify-center shrink-0 mr-2 ${''} ${isExpanded ? "" : "my-auto"} transition-colors`}
+            onClick={voiceService.isRecording ? voiceService.stopRecording : voiceService.startRecording}
+            className={`rounded-full w-10 h-10 flex items-center justify-center shrink-0 mr-2 bg-[#D1376A] ${isExpanded ? "" : "my-auto"} ${
+              (isLoading || voiceService.isProcessingVoice) ? 'opacity-50 cursor-not-allowed' : ''
+            } transition-colors`}
+            disabled={isLoading || voiceService.isProcessingVoice}
           >
+            {voiceService.isRecording ? (
+              <StopCircle className="w-5 h-5 text-white" />
+            ) : voiceService.isProcessingVoice ? (
+              <LoaderCircle className="w-5 h-5 text-white animate-spin" />
+            ) : (
               <Mic className="w-5 h-5 text-white" />
-          </button>
+            )}
+        </button>
 
           <button 
             type="submit" 
