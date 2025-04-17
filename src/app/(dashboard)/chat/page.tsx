@@ -1,3 +1,4 @@
+//src/app/(dashboard)/chat/page.tsx
 import React from 'react'
 
 const page = () => {
