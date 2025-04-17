@@ -8,10 +8,10 @@ export default function Page() {
       <div className="h-[60px] items-center lg:pl-14 hidden lg:block">
         <h2 className="text-md font-semibold flex items-center pt-3">
           <ChatLight className="mr-2 h-5 w-5 text-blue-500" />
-          Career Navigator Assistant
+          Decision Thought Partner
         </h2>
         <p className="text-muted-foreground text-sm ml-2">
-          Get personalized career guidance, skill recommendations, and job advice.
+        Work through decisions, reflect on outcomes, and gain personal insights.
         </p>
       </div>
       <div className="flex-1 h-[calc(100vh-62px)]">

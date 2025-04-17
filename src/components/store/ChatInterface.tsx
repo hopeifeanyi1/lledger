@@ -2,10 +2,13 @@
 import React, { useState, useRef, useEffect } from "react";
 import { SendIcon } from "./Icon";
 import { useChat } from 'ai/react';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { LoaderCircle, Briefcase, BookOpen, Award, Pencil, X, Check, Mic, StopCircle, Volume2, AudioLines } from "lucide-react";
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
+import { LoaderCircle, Briefcase, BookOpen, Award, Pencil, X, Check, Mic, Volume2, AudioLines } from "lucide-react";
 
 const ChatInterface = () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [user, setUser] = useState<any>(null);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -14,6 +17,8 @@ const ChatInterface = () => {
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState("");
   const editTextAreaRef = useRef<HTMLTextAreaElement>(null);
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
   
   const { 
     messages, 
@@ -155,12 +160,50 @@ const ChatInterface = () => {
     }
   };
 
+  useEffect(() => {
+      const checkUser = async () => {
+        const { data, error } = await supabase.auth.getSession();
+        
+        if (error || !data.session) {
+          router.push('/login');
+          return;
+        }
+  
+        setUser(data.session.user);
+        setLoading(false);
+      };
+  
+      checkUser();
+  
+      const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_OUT') {
+          router.push('/login');
+        } else if (session && event === 'SIGNED_IN') {
+          setUser(session.user);
+          setLoading(false);
+        }
+      });
+  
+      return () => {
+        if (authListener && authListener.subscription) {
+          authListener.subscription.unsubscribe();
+        }
+      };
+    }, [router]);
+  
+    if (loading) {
+      return <div className="flex items-center justify-center h-screen">Loading...</div>;
+    }
+  
+    const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+  
+
   // Suggested career-related questions
   const suggestedQuestions = [
-    "What careers match my skills in programming?",
-    "How can I improve my resume?",
-    "What courses should I take for data science?",
-    "How do I prepare for a job interview?"
+    "Help me decide between two job offers",
+    "What questions should I consider for a big purchase?",
+    "How can I identify my biases in this decision?",
+    "What factors should I weigh for a career change?"
   ];
 
 
@@ -171,8 +214,8 @@ const ChatInterface = () => {
           {messages.length === 0 ? (
             <div className="flex flex-col h-full items-center justify-center gap-6">
               <div className="text-center">
-                <h3 className="md:text-xl text-lg font-medium mb-2">Welcome, </h3>
-                <p className="md:text-[16px] text-md">I&apos;m here to help you discover and build your ideal career path.</p>
+                <h3 className="md:text-xl text-lg font-medium mb-2">Hey {userName?.split(" ")[0]}, ready to think through something today?</h3>
+                <p className="md:text-[16px] text-md">I&apos;m your thought partner to help you make better decisions and learn from past ones.</p>
               </div>
               
               <div className="grid md:grid-cols-2 grid-cols-1 gap-3 w-full max-w-2xl px-4">
