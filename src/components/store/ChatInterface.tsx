@@ -1,190 +1,327 @@
-// src/components/store/ChatInterface.tsx
-'use client'
-
-import React, { useState, useRef, useEffect } from 'react'
-import { useChat } from 'ai/react'
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Send, Loader2, ThumbsUp, ThumbsDown } from "lucide-react"
+'use client';
+import React, { useState, useRef, useEffect } from "react";
+import { SendIcon } from "./Icon";
+import { useChat } from 'ai/react';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { LoaderCircle, Briefcase, BookOpen, Award, Pencil, X, Check, Mic, StopCircle, Volume2, AudioLines } from "lucide-react";
 
 const ChatInterface = () => {
-  const [isSending, setIsSending] = useState(false)
-  const [showSuggestions, setShowSuggestions] = useState(true)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
-
-  // Sample decision context - in a real app, this would come from the decision entry form
-  const decisionContext = {
-    category: "Career",
-    urgency: "Soon",
-    description: "Deciding whether to take a new job offer or stay at my current company"
-  }
-
-  const { messages, input, handleInputChange, handleSubmit } = useChat({
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [minTimeElapsed, setMinTimeElapsed] = useState(true);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editingContent, setEditingContent] = useState("");
+  const editTextAreaRef = useRef<HTMLTextAreaElement>(null);
+  
+  const { 
+    messages, 
+    input, 
+    handleInputChange, 
+    handleSubmit, 
+    isLoading, 
+    error,
+    setMessages,
+    reload
+  } = useChat({
     api: '/api/chat',
-    body: {
-      decisionContext: decisionContext
-    },
-    onResponse: () => {
-      setIsSending(false)
+    onError: (err) => {
+      console.error('Chat Error:', err);
     }
-  })
+  });
+
+  useEffect(() => {
+    if (isLoading) {
+      setMinTimeElapsed(false);
+      timeoutRef.current = setTimeout(() => {
+        setMinTimeElapsed(true);
+      }, 3000);
+    } else {
+      setMinTimeElapsed(true);
+    }
+
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [isLoading]);
+
+  const showTyping = isLoading || !minTimeElapsed;
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, showTyping]);
+
+  useEffect(() => {
+    if (!input && textAreaRef.current) {
+      textAreaRef.current.style.height = '52px';
+      setIsExpanded(false);
+    }
+  }, [input]);
+
+  // Auto-resize edit textarea
+  useEffect(() => {
+    if (editingMessageId && editTextAreaRef.current) {
+      editTextAreaRef.current.style.height = "auto";
+      editTextAreaRef.current.style.height = `${editTextAreaRef.current.scrollHeight}px`;
+    }
+  }, [editingContent, editingMessageId]);
+
+  // Focus the edit textarea when editing starts
+  useEffect(() => {
+    if (editingMessageId && editTextAreaRef.current) {
+      editTextAreaRef.current.focus();
+    }
+  }, [editingMessageId]);
+
+  const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    handleInputChange(e);
+    const textarea = e.target;
+    textarea.style.height = "auto";
+    const newHeight = Math.min(textarea.scrollHeight, 180);
+    textarea.style.height = `${newHeight}px`;
+    setIsExpanded(newHeight > 52);
+    textarea.style.overflowY = newHeight === 180 ? "auto" : "hidden";
+  };
 
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    if (input.trim()) {
-      setIsSending(true)
-      setShowSuggestions(false)
-      handleSubmit(e)
+    e.preventDefault();
+    if (!input.trim()) return;
+    handleSubmit(e);
+    if (textAreaRef.current) {
+      textAreaRef.current.style.height = '52px';
     }
-  }
+  };
 
-  const handleSuggestionClick = (suggestion: string) => {
-    if (textareaRef.current) {
-      textareaRef.current.value = suggestion
-      handleInputChange({ target: { value: suggestion } } as React.ChangeEvent<HTMLTextAreaElement>)
-      setShowSuggestions(false)
+  const handleEditStart = (messageId: string, content: string) => {
+    setEditingMessageId(messageId);
+    setEditingContent(content);
+  };
+
+  const handleEditCancel = () => {
+    setEditingMessageId(null);
+    setEditingContent("");
+  };
+
+  const handleEditSubmit = () => {
+    if (!editingMessageId || !editingContent.trim()) {
+      handleEditCancel();
+      return;
     }
-  }
 
-  // Auto-scroll to bottom when messages change
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+    // Find the edited message index
+    const editedMessageIndex = messages.findIndex(m => m.id === editingMessageId);
+    if (editedMessageIndex === -1) {
+      handleEditCancel();
+      return;
+    }
 
-  const renderMessage = (message: any, index: number) => {
-    const isUser = message.role === 'user'
+    const newMessages = [...messages];
     
-    return (
-      <div 
-        key={index}
-        className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}
-      >
-        <div className={`flex max-w-[80%] ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
-          <Avatar className={`h-8 w-8 ${isUser ? 'ml-2' : 'mr-2'}`}>
-            <AvatarFallback>{isUser ? 'U' : 'AI'}</AvatarFallback>
-            {!isUser && <AvatarImage src="/ai-avatar.png" alt="AI" />}
-          </Avatar>
-          
-          <div className={`rounded-lg p-3 ${
-            isUser 
-              ? 'bg-primary text-primary-foreground rounded-tr-none' 
-              : 'bg-secondary text-secondary-foreground rounded-tl-none'
-          }`}>
-            <div className="text-sm whitespace-pre-wrap">
-              {message.content}
-            </div>
-            
-            {!isUser && (
-              <div className="flex items-center justify-end gap-2 mt-2">
-                <button className="text-muted-foreground hover:text-foreground">
-                  <ThumbsUp className="h-3 w-3" />
-                </button>
-                <button className="text-muted-foreground hover:text-foreground">
-                  <ThumbsDown className="h-3 w-3" />
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    )
-  }
+    newMessages[editedMessageIndex] = {
+      ...newMessages[editedMessageIndex],
+      content: editingContent
+    };
+    
+    const truncatedMessages = newMessages.slice(0, editedMessageIndex + 2);
+    
+    const lastMessageIndex = messages.length - 1;
+    const finalMessages = editedMessageIndex === lastMessageIndex ? newMessages : truncatedMessages;
+    
+    setMessages(finalMessages);
+    
+    setEditingMessageId(null);
+    setEditingContent("");
+    
+    if (editedMessageIndex < lastMessageIndex) {
+      setTimeout(() => {
+        // Convert the messages to a format that matches JSONValue
+        const jsonSafeMessages = finalMessages.map(msg => ({
+          id: msg.id,
+          role: msg.role as "user" | "system" | "assistant",
+          content: msg.content
+        }));
+        
+        reload({
+          data: { messages: jsonSafeMessages }
+        });
+      }, 100);
+    }
+  };
+
+  // Suggested career-related questions
+  const suggestedQuestions = [
+    "What careers match my skills in programming?",
+    "How can I improve my resume?",
+    "What courses should I take for data science?",
+    "How do I prepare for a job interview?"
+  ];
+
 
   return (
-    <div className="flex flex-col h-full">
-      <ScrollArea className="flex-grow pr-4">
-        <div className="space-y-4 pb-4">
+    <div className="w-full h-full flex flex-col">
+      <div className="relative lg:rounded-2xl flex-1 bg-background text-foreground w-full lg:w-[85%] mx-0 lg:mx-auto flex flex-col lg:h-[calc(100dvh-120px)] overflow-scroll">        
+        <div className="flex-1 space-y-4 lg:px-4 px-3 overflow-x-hidden lg:pt-3 pt-[55px]">
           {messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-32 text-center">
-              <p className="text-muted-foreground mb-2">I'm your AI Thought Partner</p>
-              <p className="text-sm text-muted-foreground">How can I help with your decision today?</p>
+            <div className="flex flex-col h-full items-center justify-center gap-6">
+              <div className="text-center">
+                <h3 className="md:text-xl text-lg font-medium mb-2">Welcome, </h3>
+                <p className="md:text-[16px] text-md">I&apos;m here to help you discover and build your ideal career path.</p>
+              </div>
+              
+              <div className="grid md:grid-cols-2 grid-cols-1 gap-3 w-full max-w-2xl px-4">
+                {suggestedQuestions.map((question, index) => (
+                  <button
+                    key={index}
+                    className="bg-secondary hover:bg-muted-foreground text-left px-4 py-3 rounded-lg text-sm flex items-start transition-colors"
+                    onClick={() => {
+                      if (textAreaRef.current) {
+                        textAreaRef.current.value = question;
+                        const event = new Event('input', { bubbles: true });
+                        textAreaRef.current.dispatchEvent(event);
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        handleInputChange({ target: { value: question } } as any);
+                      }
+                    }}
+                  >
+                    <div className="mr-3 mt-0.5">
+                      {index === 0 && <Briefcase className="h-4 w-4 text-blue-500" />}
+                      {index === 1 && <Award className="h-4 w-4 text-green-500" />}
+                      {index === 2 && <BookOpen className="h-4 w-4 text-purple-500" />}
+                      {index === 3 && <Award className="h-4 w-4 text-orange-500" />}
+                    </div>
+                    <span>{question}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           ) : (
-            messages.map(renderMessage)
+            messages.map((m) => (
+              <div 
+                key={m.id} 
+                className={`flex text-sm ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div className={`lg:max-w-[80%] max-w-[87%] ${
+                  m.role === 'user' 
+                    ? 'bg-secondary-foreground/25 relative' 
+                    : 'relative'
+                } ${
+                  (m.content.length > 22) ? 'rounded-2xl' : 'rounded-full'
+                } px-4 py-2`}>
+                  {m.role === 'user' && editingMessageId !== m.id && (
+                    <button 
+                      onClick={() => handleEditStart(m.id, m.content)}
+                      className="absolute -left-8 top-1/2 transform -translate-y-1/2"
+                      aria-label="Edit message"
+                    >
+                      <Pencil className="h-4 w-4 text-muted-foreground" />
+                    </button>
+                  )}
+                  
+                  {m.role === 'assistant' && (
+                    <button
+                      className="absolute -left-8 top-1/2 transform -translate-y-1/2"
+                      aria-label="Play response"
+                    >
+                      <Volume2 className="h-4 w-4 text-muted-foreground" />
+                    </button>
+                  )}
+                  
+                  {editingMessageId === m.id ? (
+                    <div className="flex flex-col space-y-2">
+                      <textarea
+                        ref={editTextAreaRef}
+                        value={editingContent}
+                        onChange={(e) => setEditingContent(e.target.value)}
+                        className="w-full bg-transparent resize-none outline-none"
+                        rows={1}
+                      />
+                      <div className="flex justify-end space-x-2">
+                        <button 
+                          onClick={handleEditCancel}
+                          className="p-1 rounded-full hover:bg-secondary"
+                          aria-label="Cancel edit"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                        <button 
+                          onClick={handleEditSubmit}
+                          className="p-1 rounded-full hover:bg-secondary"
+                          aria-label="Submit edit"
+                        >
+                          <Check className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-md whitespace-pre-wrap">
+                      {m.content}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+          
+          {showTyping && (
+            <div className="text-sm flex pl-4">
+              <div className="bg-secondary-foreground rounded-full w-[10px] h-[10px] mr-[8px] animate-pulse delay-0"/>
+              <div className="bg-secondary-foreground rounded-full w-[10px] h-[10px] mr-[8px] animate-pulse delay-200"/>
+              <div className="bg-secondary-foreground rounded-full w-[10px] h-[10px] animate-pulse delay-400"/>
+            </div>
+          )}
+
+          {error && (
+            <div className="text-red-500 p-2 rounded bg-red-100">
+              {error.message}
+            </div>
           )}
           <div ref={messagesEndRef} />
         </div>
-      </ScrollArea>
-      
-      {showSuggestions && messages.length === 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4">
-          <Button 
-            variant="outline" 
-            className="justify-start h-auto py-3 px-4 text-left"
-            onClick={() => handleSuggestionClick("What are the options I should consider for this decision?")}
-          >
-            <div>
-              <p className="font-medium">What are my options?</p>
-              <p className="text-xs text-muted-foreground">Explore possible choices</p>
-            </div>
-          </Button>
-          <Button 
-            variant="outline" 
-            className="justify-start h-auto py-3 px-4 text-left"
-            onClick={() => handleSuggestionClick("What are the pros and cons of each option I'm considering?")}
-          >
-            <div>
-              <p className="font-medium">Pros & Cons</p>
-              <p className="text-xs text-muted-foreground">List benefits and drawbacks</p>
-            </div>
-          </Button>
-          <Button 
-            variant="outline" 
-            className="justify-start h-auto py-3 px-4 text-left"
-            onClick={() => handleSuggestionClick("What biases might be affecting my thinking about this decision?")}
-          >
-            <div>
-              <p className="font-medium">Check for Biases</p>
-              <p className="text-xs text-muted-foreground">Identify cognitive blind spots</p>
-            </div>
-          </Button>
-          <Button 
-            variant="outline" 
-            className="justify-start h-auto py-3 px-4 text-left"
-            onClick={() => handleSuggestionClick("What values or criteria matter most to me in this decision?")}
-          >
-            <div>
-              <p className="font-medium">Clarify Values</p>
-              <p className="text-xs text-muted-foreground">What matters most to you</p>
-            </div>
-          </Button>
-        </div>
-      )}
-      
-      <form onSubmit={handleFormSubmit} className="flex items-end gap-2 pt-2">
-        <div className="flex-grow relative">
-          <Textarea
-            ref={textareaRef}
-            value={input}
-            onChange={handleInputChange}
-            placeholder="Type your message..."
-            className="min-h-12 resize-none pr-12"
-            rows={1}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault()
-                if (input.trim()) {
-                  setIsSending(true)
-                  handleSubmit(e as any)
-                }
-              }
-            }}
-          />
-          <Button 
-            type="submit" 
-            size="icon" 
-            className="absolute right-2 bottom-2 h-8 w-8" 
-            disabled={isSending || !input.trim()}
-          >
-            {isSending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-          </Button>
-        </div>
-      </form>
-    </div>
-  )
-}
 
-export default ChatInterface
+        <form 
+          onSubmit={handleFormSubmit} 
+          className={`flex items-end border border-secondary-foreground/30 bg-white text-black lg:w-[70%] w-[100%] px-4 py-1.5 min-h-[52px] transition-all duration-300 mx-auto mb-2 ${isExpanded ? "rounded-2xl" : "rounded-full"}`}
+        >
+          <textarea
+            ref={textAreaRef}
+            value={input}
+            onChange={handleInput}
+            placeholder="Ask about careers, skills, or job preparation..."
+            className="pl-2 lg:mr-5 mr-2 outline-none w-full resize-none bg-transparent max-h-[180px] overflow-y-hidden py-3 lg:text-md text-sm"
+            rows={1}
+          />
+
+          <button
+            type="button"
+            className={`rounded-full w-10 h-10 flex items-center justify-center shrink-0 mr-2 ${''} ${isExpanded ? "" : "my-auto"} transition-colors`}
+          >
+              <Mic className="w-5 h-5 text-white" />
+          </button>
+
+          <button 
+            type="submit" 
+            className={`bg-black rounded-full w-10 h-10 flex items-center justify-center shrink-0 ${isExpanded ? "" : "my-auto"} transition-colors`}
+          >
+            {isLoading ? (
+              <div className="animate-spin text-white text-xl"><LoaderCircle className="w-4 h-4"/></div>
+            ) : input.trim() === '' ? (
+              <AudioLines className="w-5 h-5 text-white" />
+            ) : (
+              <SendIcon className="w-5 h-5 text-white" />
+            )}
+          </button>
+        </form>
+        
+      </div>
+    </div>
+  );
+};
+
+export default ChatInterface;
