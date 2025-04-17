@@ -10,6 +10,13 @@ export const config = {
   },
 };
 
+// Define the response type
+interface GroqTranscriptionResponse {
+  text: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
@@ -99,8 +106,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get the response data
-    const responseData = await response.json();
+    // Get the response data with type
+    const responseData = await response.json() as GroqTranscriptionResponse;
     
     // Return the transcription result
     if (responseData && responseData.text) {
