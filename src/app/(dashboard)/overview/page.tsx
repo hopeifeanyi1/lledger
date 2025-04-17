@@ -83,7 +83,7 @@ const DecisionCard: React.FC<DecisionCardProps> = ({ decision }) => {
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
       className=''
     >
-      <Card className="h-48 w-full sm:w-[145px] relative overflow-hidden my-4 sm:my-8 mx-auto sm:ml-2">
+      <Card className="h-48 w-full sm:w-[145px] relative overflow-hidden my-2 mx-auto sm:ml-2">
         <div className={`absolute top-0 right-0 px-2 py-1 text-xs font-medium rounded-bl-md ${getOutcomeStyles(decision.outcome)}`}>
           {decision.outcome}
         </div>
@@ -236,20 +236,17 @@ const OverviewPage = () => {
                 
                 <hr className='border-t-[1px] border-black/40 dark:border-white/40 mt-8 sm:mt-10 md:mt-12 w-full md:w-[76%]'/>
             </div>
-            <div className="mt-4 sm:mt-6 md:mt-10">
-                <Tabs defaultValue="quick-stats" className="w-full">
-                <TabsList className="ml-0 md:ml-1 bg-transparent gap-x-2 md:gap-x-5 text-black dark:text-white overflow-x-auto max-w-full">
-                    <TabsTrigger value="quick-stats" className='text-xs sm:text-sm text-black/55 dark:text-white/55 data-[state=active]:bg-[#D1376A]/20 data-[state=active]:text-[#D1376A] dark:data-[state=active]:bg-[#D1376A]/20 dark:data-[state=active]:text-[#D1376A] data-[state=active]:rounded-2xl whitespace-nowrap'>Quick Stats</TabsTrigger>
-                    <TabsTrigger value="recent-decisions" className='text-xs sm:text-sm text-black/55 dark:text-white/55 data-[state=active]:bg-[#D1376A]/20 data-[state=active]:text-[#D1376A] dark:data-[state=active]:bg-[#D1376A]/20 dark:data-[state=active]:text-[#D1376A] whitespace-nowrap'>Recent Decisions</TabsTrigger>
-                    <TabsTrigger value="top-categories" className='text-xs sm:text-sm text-black/55 dark:text-white/55 data-[state=active]:bg-[#D1376A]/20 data-[state=active]:text-[#D1376A] dark:data-[state=active]:bg-[#D1376A]/20 dark:data-[state=active]:text-[#D1376A] whitespace-nowrap'>Top Categories</TabsTrigger>
+            <div className="mt-4 md:mt-10">
+                <Tabs defaultValue="quick-stats" className="w-full ">
+                <TabsList className="ml-0 md:ml-1 bg-transparent gap-x-2 md:gap-x-5 text-black dark:text-white overflow-x-auto max-w-full py-7">
+                    <TabsTrigger value="quick-stats" className='text-xs sm:text-sm text-black/55 dark:text-white/55 data-[state=active]:bg-[#D1376A]/20 data-[state=active]:text-[#D1376A] dark:data-[state=active]:bg-[#D1376A]/20 dark:data-[state=active]:text-[#D1376A] data-[state=active]:rounded-md whitespace-nowrap'>Quick Stats</TabsTrigger>
+                    <TabsTrigger value="recent-decisions" className='text-xs sm:text-sm text-black/55 dark:text-white/55 data-[state=active]:bg-[#D1376A]/20 data-[state=active]:text-[#D1376A] dark:data-[state=active]:bg-[#D1376A]/20 dark:data-[state=active]:text-[#D1376A] whitespace-nowrap data-[state=active]:rounded-md'>Recent Decisions Timeline</TabsTrigger>
+                    <TabsTrigger value="top-categories" className='text-xs sm:text-sm text-black/55 dark:text-white/55 data-[state=active]:bg-[#D1376A]/20 data-[state=active]:text-[#D1376A] dark:data-[state=active]:bg-[#D1376A]/20 dark:data-[state=active]:text-[#D1376A] whitespace-nowrap data-[state=active]:rounded-md'>Top Categories</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="quick-stats" className=''>
                     <Card className='border-0 shadow-none gap-4 sm:gap-6 bg-transparent w-full md:w-[68%]'>
-                        <CardHeader className="px-2 sm:px-4 py-0 sm:py-0">
-                        <CardTitle></CardTitle>
-                        </CardHeader>
-                        <CardContent className="px-2 sm:px-6">
+                        <CardContent className="px-2 sm:px-6 mt-3 md:mt-5">
                           <div className="flex flex-col sm:flex-row justify-between gap-4 sm:gap-6 md:gap-0 mb-6 sm:mb-8 md:mb-12">
                             <div>
                                 <p className="text-sm md:text-[15px] font-medium">Total Decisions <Info className='text-black/30 dark:text-white/30 w-[11px] h-[11px] inline ml-1 md:ml-3'/> </p>

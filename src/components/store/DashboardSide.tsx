@@ -1,15 +1,17 @@
-//src/components/store/DashboardSide.tsx
+// src/components/store/DashboardSide.tsx
 'use client'
 import React, { useState } from 'react'
 import { SIDENAV_ITEMS } from '@/constants'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Bars } from './Icon';
 import { Sheet, SheetContent, SheetClose, SheetTrigger, SheetHeader, SheetTitle } from "../ui/sheet";
 import { SideNavItem } from '@/types';
+import { signOut } from 'next-auth/react';
 
 const DashboardSide = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   
   const regularLinks = SIDENAV_ITEMS.filter(item => item.id < 5);
@@ -20,9 +22,14 @@ const DashboardSide = () => {
     return pathname.startsWith(path);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleLinkClick = (item: SideNavItem) => {
+  const handleLinkClick = async (item: SideNavItem) => {
     setIsSheetOpen(false);
+    
+    // Handle logout
+    if (item.title === 'Log out') {
+      await signOut({ redirect: false });
+      router.push('/');
+    }
   };
 
   const renderLink = (item: SideNavItem, inMobileView: boolean = false) => {
@@ -35,15 +42,23 @@ const DashboardSide = () => {
       </div>
     );
 
-    if (item.id === 8) {
+    // Handle logout separately
+    if (item.title === 'Log out') {
       return inMobileView ? (
         <SheetClose key={item.id} asChild>
-          <div onClick={() => handleLinkClick(item)}>
+          <div 
+            className="cursor-pointer" 
+            onClick={() => handleLinkClick(item)}
+          >
             {linkContent}
           </div>
         </SheetClose>
       ) : (
-        <div key={item.id} onClick={() => handleLinkClick(item)}>
+        <div 
+          key={item.id} 
+          className="cursor-pointer" 
+          onClick={() => handleLinkClick(item)}
+        >
           {linkContent}
         </div>
       );

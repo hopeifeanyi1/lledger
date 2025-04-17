@@ -1,11 +1,13 @@
+// src/app/(auth)/signup/page.tsx
 'use client'
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Intro } from '../../../../public/svgs';
 import Logo from '@/components/store/Logo';
 import { Mail } from 'lucide-react';
 import { Google } from '@/components/store/Icon';
+import { signIn, useSession } from 'next-auth/react';
 import { supabase } from '@/lib/supabase';
 
 const SignupPage = () => {
@@ -16,8 +18,16 @@ const SignupPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+  const { status } = useSession();
 
-  const handleSubmit = async (e: { preventDefault: () => void; }) => {
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (status === 'authenticated') {
+      router.push('/overview');
+    }
+  }, [status, router]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
@@ -30,19 +40,30 @@ const SignupPage = () => {
     }
 
     try {
-      const { data, error } = await supabase.auth.signUp({
+      // Create user in Supabase
+      const { error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/overview`,
+          emailRedirectTo: `${window.location.origin}/login`,
         }
       });
 
-      if (error) {
-        throw error;
+      if (signUpError) {
+        throw signUpError;
       }
 
-      if (data.user) {
+      // Sign in with NextAuth
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        // If sign-in fails, still tell the user signup was successful
+        router.push('/login?message=Check your email to verify your account');
+      } else {
         router.push('/overview');
       }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -55,19 +76,10 @@ const SignupPage = () => {
 
   const handleGoogleSignup = async () => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/overview`,
-        },
-      });
-  
-      if (error) {
-        throw error;
-      }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      setError(error.message || 'Failed to sign up with Google');
+      await signIn('google', { callbackUrl: '/overview' });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      setError('Failed to sign up with Google');
     }
   };
 
@@ -75,17 +87,10 @@ const SignupPage = () => {
     setShowPassword(!showPassword);
   };
 
-    useEffect(() => {
-        const checkUser = async () => {
-        const { data } = await supabase.auth.getSession();
-        
-        if (data.session) {
-            router.push('/overview');
-        }
-        };
-    
-        checkUser();
-    }, [router]);
+  if (status === 'loading') {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  }
+
   return (
     <div className='bg-white text-black px-4 sm:px-6 md:px-[8vw] flex flex-col md:flex-row justify-between lg:space-x-14 min-h-screen md:h-screen items-center py-8 md:py-0'>
       <div className='hidden md:block'>

@@ -1,12 +1,14 @@
+// src/app/(auth)/login/page.tsx
 'use client'
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Intro } from '../../../../public/svgs';
 import Logo from '@/components/store/Logo';
 import { Mail } from 'lucide-react';
 import { Google } from '@/components/store/Icon';
-import { supabase } from '@/lib/supabase';
+import { signIn, useSession } from 'next-auth/react';
+import { useEffect } from 'react';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -15,65 +17,56 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+  const { status } = useSession();
 
-  const handleSubmit = async (e: { preventDefault: () => void; }) => {
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (status === 'authenticated') {
+      router.push('/overview');
+    }
+  }, [status, router]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const result = await signIn('credentials', {
         email,
         password,
+        redirect: false,
       });
 
-      if (error) {
-        throw error;
-      }
-
-      if (data.user) {
+      if (result?.error) {
+        setError('Invalid email or password');
+      } else {
         router.push('/overview');
       }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      setError(error.message || 'Failed to login');
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      setError('An error occurred during login');
     } finally {
       setLoading(false);
     }
   };
 
-    useEffect(() => {
-    const checkUser = async () => {
-      const { data } = await supabase.auth.getSession();
-      
-      if (data.session) {
-        router.push('/overview');
-      }
-    };
-  
-    checkUser();
-  }, [router]);
   const handleGoogleLogin = async () => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/overview`,
-        },
-      });
-  
-      if (error) {
-        throw error;
-      }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      setError(error.message || 'Failed to login with Google');
+      await signIn('google', { callbackUrl: '/overview' });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      setError('Failed to login with Google');
     }
   };
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+
+  if (status === 'loading') {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  }
 
   return (
     <div className='bg-white text-black px-4 sm:px-6 md:px-[10vw] flex flex-col md:flex-row justify-between lg:space-x-14 min-h-screen md:h-screen items-center py-8 md:py-0'>
