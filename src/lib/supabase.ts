@@ -4,7 +4,14 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Create client with auth configuration
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  }
+})
 
 // User profile helper functions
 export async function getUserProfile(userId: string) {
@@ -26,6 +33,7 @@ export async function getUserProfile(userId: string) {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function updateUserProfile(userId: string, updates: any) {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { data, error } = await supabase
       .from('profiles')
       .update(updates)
@@ -33,7 +41,7 @@ export async function updateUserProfile(userId: string, updates: any) {
       .select();
     
     if (error) throw error;
-    return data;
+    return null;
   } catch (error) {
     console.error('Error updating user profile:', error);
     return null;

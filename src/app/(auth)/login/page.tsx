@@ -61,7 +61,7 @@ const LoginPage = () => {
           redirectTo: `${window.location.origin}/overview`,
         },
       });
-
+  
       if (error) {
         throw error;
       }

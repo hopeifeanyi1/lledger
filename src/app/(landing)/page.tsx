@@ -370,7 +370,7 @@ export default function Home() {
                 <input 
                   type="email" 
                   placeholder="Enter your email" 
-                  className="px-4 py-3 rounded-lg flex-1 border-0" 
+                  className="px-4 py-3 rounded-lg flex-1 border-1" 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />

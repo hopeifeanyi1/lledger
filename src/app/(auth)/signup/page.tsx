@@ -61,7 +61,7 @@ const SignupPage = () => {
           redirectTo: `${window.location.origin}/overview`,
         },
       });
-
+  
       if (error) {
         throw error;
       }

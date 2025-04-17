@@ -1,4 +1,3 @@
-//src/app/(dashboard)/overview/page.tsx
 'use client'
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation';
@@ -8,8 +7,11 @@ import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Calendar } from "@/components/ui/calendar"
-import { Info, Bell } from 'lucide-react';
+import { Info, Bell, Plus, Calendar as CalendarIcon, BarChart } from 'lucide-react';
 import { format } from 'date-fns';
+import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 // Define types for our data
 interface Decision {
@@ -61,13 +63,41 @@ interface DecisionCardProps {
   decision: Decision;
 }
 
-const DecisionCard: React.FC<DecisionCardProps> = ({ decision }) => (
-  <Card className="h-44 w-[145px]  ">
-    <CardHeader className="h-full w-full px-2 flex justify-center">
-      <CardTitle className="text-sm m-auto ">{decision.title}</CardTitle>
-    </CardHeader>
-  </Card>
-);
+const DecisionCard: React.FC<DecisionCardProps> = ({ decision }) => {
+  const getOutcomeStyles = (outcome: string) => {
+    switch(outcome) {
+      case 'Good':
+        return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
+      case 'Bad':
+        return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
+      case 'Pending':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+    }
+  };
+
+  return (
+    <motion.div
+      whileHover={{ scale: 1.05 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      className=''
+    >
+      <Card className="h-48 w-full sm:w-[145px] relative overflow-hidden my-4 sm:my-8 mx-auto sm:ml-2">
+        <div className={`absolute top-0 right-0 px-2 py-1 text-xs font-medium rounded-bl-md ${getOutcomeStyles(decision.outcome)}`}>
+          {decision.outcome}
+        </div>
+        <CardHeader className="h-full w-full px-2 flex flex-col justify-between">
+          <CardTitle className="text-sm m-auto text-center">{decision.title}</CardTitle>
+          <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+            <span className="block">{decision.category}</span>
+            <span className="block">{decision.date}</span>
+          </div>
+        </CardHeader>
+      </Card>
+    </motion.div>
+  );
+};
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const UserAvatar: React.FC<{ user: any }> = ({ user }) => {
@@ -81,8 +111,9 @@ const UserAvatar: React.FC<{ user: any }> = ({ user }) => {
   };
   
   return (
-    <div className="rounded-full overflow-hidden border-4 border-[#D1376A] w-24 h-24">
+    <div className="rounded-full overflow-hidden border-4 border-[#D1376A] w-16 h-16 sm:w-24 sm:h-24">
       {user?.user_metadata?.avatar_url ? (
+        // eslint-disable-next-line @next/next/no-img-element
         <img 
           src={user.user_metadata.avatar_url} 
           alt="Profile picture" 
@@ -90,12 +121,35 @@ const UserAvatar: React.FC<{ user: any }> = ({ user }) => {
         />
       ) : (
         <div className="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-700">
-          <span className="text-xl font-bold">{getUserInitials()}</span>
+          <span className="text-lg sm:text-xl font-bold">{getUserInitials()}</span>
         </div>
       )}
     </div>
   );
 };
+
+// Quick Action Button Component
+interface QuickActionProps {
+  icon: React.ReactNode;
+  label: string;
+  href: string;
+}
+
+const QuickActionButton: React.FC<QuickActionProps> = ({ icon, label, href }) => (
+  <motion.div whileHover={{ scale: 1.05 }} transition={{ type: "spring", stiffness: 300 }}>
+    <Link href={href}>
+      <Button 
+        variant="outline" 
+        className="h-12 sm:h-14 w-full flex items-center justify-start gap-2 border-2 border-[#D1376A]/20 hover:bg-[#D1376A]/10 hover:border-[#D1376A] transition-all px-2"
+      >
+        <div className="bg-[#D1376A]/20 p-1.5 rounded-full">
+          {icon}
+        </div>
+        <span className="text-xs sm:text-sm">{label}</span>
+      </Button>
+    </Link>
+  </motion.div>
+);
 
 const OverviewPage = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -141,9 +195,7 @@ const OverviewPage = () => {
   }
 
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
-  const userAge = user?.user_metadata?.age || '22'; // Fallback age if not provided
   
-  // Determine outcome color based on percentage
   const getOutcomeColor = (percentage: number) => {
     return percentage >= 50 ? 'text-[#319F43] dark:text-[#319F43]' : 'text-red-600 dark:text-red-400';
   };
@@ -154,40 +206,62 @@ const OverviewPage = () => {
   };
 
   return (
-    <div className='pt-6 md:pt-12 px-4 md:px-10'>
-      <div className='grid grid-cols-1 md:grid-cols-5'>
-        <div className='col-span-1 md:col-span-3'>
-            <div className=''>
-                <p className='font-medium text-xl md:text-2xl'>Hello <span className='text-[#D1376A]'>{userName}!</span></p>
-                <p className='text-3xl md:text-5xl font-bold w-full lg:w-[500px] mt-5 md:mt-10 leading-tight lg:leading-[50px]'>Here&apos;s your current decision landscape!</p>
-                <hr className='border-t-[1px] border-black/40 dark:border-white/40 mt-10 md:mt-20 w-full md:w-[450px]'/>
+    <div className='pt-4 sm:pt-6 md:pt-12 px-3 sm:px-4 md:pl-10 md:pr-16 bg-background dark:bg-background overflow-y-auto h-full'>
+      <div className='grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-10'>
+        <div className='col-span-1 md:col-span-3 mt-2 sm:mt-3'>
+            <div className='pt-4 sm:pt-9'>
+                <p className='font-medium text-lg sm:text-xl md:text-2xl'>Hello <span className='text-[#D1376A]'>{userName}!</span></p>
+                <p className='text-xl sm:text-2xl md:text-4xl font-semibold w-full lg:w-[500px] mt-3 sm:mt-5 md:mt-6 leading-tight lg:leading-[50px]'>
+                  Ready to think through something today?
+                </p>
+                
+                {/* Quick Actions Section - Added as per recommendation */}
+                <div className="mt-6 sm:mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 w-full sm:w-[76%]">
+                  <QuickActionButton 
+                    icon={<Plus className="h-3 w-3 text-[#D1376A]" />} 
+                    label="New Decision" 
+                    href="/new-decision" 
+                  />
+                  <QuickActionButton 
+                    icon={<CalendarIcon className="h-4 w-4 sm:h-5 sm:w-5 text-[#D1376A]" />} 
+                    label="View Reflections" 
+                    href="/reflections" 
+                  />
+                  <QuickActionButton 
+                    icon={<BarChart className="h-4 w-4 sm:h-5 sm:w-5 text-[#D1376A]" />} 
+                    label="See Insights" 
+                    href="/insights" 
+                  />
+                </div>
+                
+                <hr className='border-t-[1px] border-black/40 dark:border-white/40 mt-8 sm:mt-10 md:mt-12 w-full md:w-[76%]'/>
             </div>
-            <div className="mt-6 md:mt-10">
+            <div className="mt-4 sm:mt-6 md:mt-10">
                 <Tabs defaultValue="quick-stats" className="w-full">
-                <TabsList className="ml-0 md:ml-1 bg-transparent gap-x-2 md:gap-x-6 text-black dark:text-white overflow-x-auto">
-                    <TabsTrigger value="quick-stats" className='text-black/55 dark:text-white/55 data-[state=active]:bg-[#D1376A]/20 data-[state=active]:text-[#D1376A] dark:data-[state=active]:bg-[#D1376A]/20 dark:data-[state=active]:text-[#D1376A]'>Quick Stats Cards</TabsTrigger>
-                    <TabsTrigger value="recent-decisions" className='text-black/55 dark:text-white/55 data-[state=active]:bg-[#D1376A]/20 data-[state=active]:text-[#D1376A] dark:data-[state=active]:bg-[#D1376A]/20 dark:data-[state=active]:text-[#D1376A]'>Recent Decisions Timeline</TabsTrigger>
-                    <TabsTrigger value="top-categories" className='text-black/55 dark:text-white/55 data-[state=active]:bg-[#D1376A]/20 data-[state=active]:text-[#D1376A] dark:data-[state=active]:bg-[#D1376A]/20 dark:data-[state=active]:text-[#D1376A]'>Top Categories</TabsTrigger>
+                <TabsList className="ml-0 md:ml-1 bg-transparent gap-x-2 md:gap-x-5 text-black dark:text-white overflow-x-auto max-w-full">
+                    <TabsTrigger value="quick-stats" className='text-xs sm:text-sm text-black/55 dark:text-white/55 data-[state=active]:bg-[#D1376A]/20 data-[state=active]:text-[#D1376A] dark:data-[state=active]:bg-[#D1376A]/20 dark:data-[state=active]:text-[#D1376A] data-[state=active]:rounded-2xl whitespace-nowrap'>Quick Stats</TabsTrigger>
+                    <TabsTrigger value="recent-decisions" className='text-xs sm:text-sm text-black/55 dark:text-white/55 data-[state=active]:bg-[#D1376A]/20 data-[state=active]:text-[#D1376A] dark:data-[state=active]:bg-[#D1376A]/20 dark:data-[state=active]:text-[#D1376A] whitespace-nowrap'>Recent Decisions</TabsTrigger>
+                    <TabsTrigger value="top-categories" className='text-xs sm:text-sm text-black/55 dark:text-white/55 data-[state=active]:bg-[#D1376A]/20 data-[state=active]:text-[#D1376A] dark:data-[state=active]:bg-[#D1376A]/20 dark:data-[state=active]:text-[#D1376A] whitespace-nowrap'>Top Categories</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="quick-stats" className=''>
-                    <Card className='border-0 shadow-none gap-6 bg-transparent w-full md:w-[68%]'>
-                        <CardHeader>
+                    <Card className='border-0 shadow-none gap-4 sm:gap-6 bg-transparent w-full md:w-[68%]'>
+                        <CardHeader className="px-2 sm:px-4 py-0 sm:py-0">
                         <CardTitle></CardTitle>
                         </CardHeader>
-                        <CardContent>
-                          <div className="flex flex-col md:flex-row justify-between gap-6 md:gap-0 mb-8 md:mb-12">
+                        <CardContent className="px-2 sm:px-6">
+                          <div className="flex flex-col sm:flex-row justify-between gap-4 sm:gap-6 md:gap-0 mb-6 sm:mb-8 md:mb-12">
                             <div>
                                 <p className="text-sm md:text-[15px] font-medium">Total Decisions <Info className='text-black/30 dark:text-white/30 w-[11px] h-[11px] inline ml-1 md:ml-3'/> </p>
-                                <p className="text-3xl md:text-5xl font-medium text-[#D1376A] mt-2 md:mt-5">{mockStats.totalDecisions}</p>
+                                <p className="text-2xl sm:text-3xl md:text-5xl font-medium text-[#D1376A] mt-1 sm:mt-2 md:mt-2">{mockStats.totalDecisions}</p>
                             </div>
-                            <div className="mt-2 md:mt-0">
+                            <div className="mt-2 sm:mt-0">
                                 <p className="text-sm md:text-[15px] font-medium">Pending Reflections <Info className='text-black/30 dark:text-white/30 w-[11px] h-[11px] inline ml-1 md:ml-3'/></p>
-                                <p className="text-3xl md:text-5xl font-medium text-[#D1376A] mt-2 md:mt-5">{mockStats.pendingReflections}</p>
+                                <p className="text-2xl sm:text-3xl md:text-5xl font-medium text-[#D1376A] mt-1 sm:mt-2 md:mt-2">{mockStats.pendingReflections}</p>
                             </div>
                           </div>
                           
-                          <div className="space-y-6 md:space-y-12">
+                          <div className="space-y-4 sm:space-y-6 md:space-y-8">
                               <p className="text-xs md:text-sm font-medium">Regret Analysis (% good Outcomes) <Info className='text-black/30 dark:text-white/30 w-[11px] h-[11px] inline ml-1 md:ml-3'/></p>
                               <span className={`text-xs md:text-sm font-medium ${getOutcomeColor(mockStats.goodOutcomePercentage)}`}>
                                 {mockStats.goodOutcomePercentage}% Good Outcome
@@ -203,17 +277,17 @@ const OverviewPage = () => {
                 </TabsContent>
                 
                 <TabsContent value="recent-decisions">
-                    <Card className="shadow-none border-0 bg-transparent mt-16">
-                    <CardContent>
-                        <Carousel className="w-full md:w-[70%]">
+                    <Card className="shadow-none border-0 bg-transparent mt-4 sm:mt-6">
+                    <CardContent className='px-0 sm:px-6'>
+                        <Carousel className="w-[89%] md:w-[78%]">
                         <CarouselContent>
                             {mockDecisions.map((decision) => (
-                            <CarouselItem key={decision.id} className="basis-full sm:basis-1/2 md:basis-1/3 pl-4">
+                            <CarouselItem key={decision.id} className="basis-1/2 sm:basis-1/2 md:basis-1/3 mx-1 md:mx-0">
                                 <DecisionCard decision={decision} />
                             </CarouselItem>
                             ))}
                         </CarouselContent>
-                        <div className="flex justify-center mt-4">
+                        <div className="flex justify-center mt-2 sm:mt-4">
                             <CarouselPrevious className="mr-1" />
                             <CarouselNext />
                         </div>
@@ -223,16 +297,16 @@ const OverviewPage = () => {
                 </TabsContent>
                 
                 <TabsContent value="top-categories">
-                    <Card className="border-0 bg-transparent shadow-none w-[70%] mt-12">
-                    <CardContent>
-                        <div className="space-y-4 md:space-y-11">
+                    <Card className="border-0 bg-transparent shadow-none w-full sm:w-[70%] mt-4 sm:mt-8">
+                    <CardContent className="px-2 sm:px-6">
+                        <div className="space-y-3 sm:space-y-4 md:space-y-8">
                         {mockStats.categories.map((category, index) => (
                             <div key={index} className="space-y-1 md:space-y-2">
                             <div className="flex justify-between">
                                 <span className="text-sm md:text-base font-medium">{category.name}</span>
                                 <span className="text-sm md:text-base">{category.percentage}%</span>
                             </div>
-                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden mt-3">
+                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden mt-2 sm:mt-3">
                                 <div 
                                 className="bg-[#D1376A] h-full rounded-full" 
                                 style={{ width: `${category.percentage}%` }}
@@ -247,15 +321,18 @@ const OverviewPage = () => {
                 </Tabs>
             </div>
         </div>
-        {/* right content */}
-        <div className='hidden md:block md:col-span-2'>
-          <div className='grid grid-cols-1 h-full gap-y-8'>
+        {/* right content - for desktop only */}
+        <div className='hidden md:block md:col-span-2 mt-10'>
+          <div className='grid grid-cols-1 h-[400px] gap-y-16'>
             {/* Profile Card */}
-            <Card className="p-6 relative">
+            <Card className="p-6 relative h-[200px]">
               <div className="absolute top-6 right-6">
-                <div className="bg-[#D1376A] rounded-full w-10 h-10 flex items-center justify-center">
+                <motion.div 
+                  whileHover={{ scale: 1.1 }}
+                  className="bg-[#D1376A] rounded-full w-10 h-10 flex items-center justify-center cursor-pointer"
+                >
                   <Bell className="text-white w-5 h-5" />
-                </div>
+                </motion.div>
               </div>
               
               <div className="flex items-center mt-4">
@@ -266,18 +343,22 @@ const OverviewPage = () => {
                 <div className="ml-5">
                   <div className="flex items-center">
                     <h3 className="text-xl font-bold">{userName}</h3>
-                    <div className="w-1 h-1 rounded-full bg-[#D1376A] mx-3"></div>
-                    <span className="text-lg">{userAge} yrs</span>
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#D1376A] mx-3"></div>
                   </div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    {mockStats.pendingReflections} pending reflections
+                  </p>
                 </div>
               </div>
             </Card>
             
             {/* Calendar Card */}
             <Card className="p-6">
-              <CardContent className="p-0">
+              <CardContent className="p-0 w-full">
                 <div className="mb-4">
-                  <h3 className="text-lg font-medium">{format(today, 'MMMM d, yyyy')}</h3>
+                  <div className='flex items-center'>
+                    <span className="text-lg font-medium">{format(today, 'MMMM d, yyyy')}</span> <span className="w-1.5 h-1.5 rounded-full bg-[#D1376A] ml-3"/>
+                  </div>
                   <h2 className="text-2xl font-bold mt-2">Today</h2>
                 </div>
                 
@@ -294,6 +375,32 @@ const OverviewPage = () => {
               </CardContent>
             </Card>
           </div>
+        </div>
+
+        {/* Mobile only - Profile Info */}
+        <div className="block md:hidden mt-6 mb-8">
+          <Card className="p-4 relative">
+            <div className="flex items-center">
+              <UserAvatar user={user} />
+              <div className="ml-4">
+                <div className="flex items-center">
+                  <h3 className="text-lg font-bold">{userName}</h3>
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#D1376A] mx-2"></div>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  {mockStats.pendingReflections} pending reflections
+                </p>
+              </div>
+              <div className="ml-auto">
+                <motion.div 
+                  whileHover={{ scale: 1.1 }}
+                  className="bg-[#D1376A] rounded-full w-8 h-8 flex items-center justify-center cursor-pointer"
+                >
+                  <Bell className="text-white w-4 h-4" />
+                </motion.div>
+              </div>
+            </div>
+          </Card>
         </div>
       </div>
     </div>

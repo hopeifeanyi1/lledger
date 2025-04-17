@@ -12,8 +12,8 @@ const DashboardSide = () => {
   const pathname = usePathname();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   
-  const regularLinks = SIDENAV_ITEMS.filter(item => item.id < 6);
-  const bottomLinks = SIDENAV_ITEMS.filter(item => item.id >= 6);
+  const regularLinks = SIDENAV_ITEMS.filter(item => item.id < 5);
+  const bottomLinks = SIDENAV_ITEMS.filter(item => item.id >= 5);
 
   const isPathActive = (path: string) => {
     if (path === '/') return pathname === '/';
