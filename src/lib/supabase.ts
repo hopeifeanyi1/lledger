@@ -1,17 +1,17 @@
 // src/lib/supabase.ts
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-// Create client for client-side operations
+// Create client with auth configuration
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true
   }
-});
+})
 
 // User profile helper functions
 export async function getUserProfile(userId: string) {
@@ -31,9 +31,10 @@ export async function getUserProfile(userId: string) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function updateUserProfile(userId: string, updates: Record<string, any>) {
+export async function updateUserProfile(userId: string, updates: any) {
   try {
-    const { error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { data, error } = await supabase
       .from('profiles')
       .update(updates)
       .eq('id', userId)
