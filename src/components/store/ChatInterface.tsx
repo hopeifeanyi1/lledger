@@ -208,8 +208,8 @@ const ChatInterface = () => {
 
 
   return (
-    <div className="w-full h-full flex flex-col">
-      <div className="relative lg:rounded-2xl flex-1 bg-background text-foreground w-full lg:w-[85%] mx-0 lg:mx-auto flex flex-col lg:h-[calc(100dvh-120px)] overflow-scroll">        
+    <div className="w-full h-full flex flex-col bg-transparent">
+      <div className="relative lg:rounded-2xl flex-1 text-foreground w-full lg:w-[85%] mx-0 lg:mx-auto flex flex-col lg:h-[calc(100dvh-120px)] overflow-scroll bg-transparent">        
         <div className="flex-1 space-y-4 lg:px-4 px-3 overflow-x-hidden lg:pt-3 pt-[55px]">
           {messages.length === 0 ? (
             <div className="flex flex-col h-full items-center justify-center gap-6">
@@ -248,19 +248,21 @@ const ChatInterface = () => {
             messages.map((m) => (
               <div 
                 key={m.id} 
-                className={`flex text-sm ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                className={`flex text-sm mb-10 ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div className={`lg:max-w-[80%] max-w-[87%] ${
                   m.role === 'user' 
-                    ? 'bg-secondary-foreground/25 relative' 
-                    : 'relative'
+                    ? 'bg-[#E0E0E0] dark:bg-neutral-600 relative' 
+                    : 'relative bg-[#D1376A]/25'
                 } ${
-                  (m.content.length > 22) ? 'rounded-2xl' : 'rounded-full'
-                } px-4 py-2`}>
+                    m.role === 'user' 
+                      ? (m.content.length > 22 ? 'rounded-t-[25px] rounded-bl-[25px]' : 'rounded-t-full rounded-bl-full')
+                      : (m.content.length > 22 ? 'rounded-t-[25px] rounded-br-[25px]' : 'rounded-t-full rounded-br-full')
+                  } px-4 lg:px-5 lg:py-3.5 py-2`}>
                   {m.role === 'user' && editingMessageId !== m.id && (
                     <button 
                       onClick={() => handleEditStart(m.id, m.content)}
-                      className="absolute -left-8 top-1/2 transform -translate-y-1/2"
+                      className="absolute right-[2px] bottom-[-30px] transform -translate-y-1/2"
                       aria-label="Edit message"
                     >
                       <Pencil className="h-4 w-4 text-muted-foreground" />
@@ -277,7 +279,7 @@ const ChatInterface = () => {
                   )}
                   
                   {editingMessageId === m.id ? (
-                    <div className="flex flex-col space-y-2">
+                    <div className="flex flex-col whitespace-pre-wrap space-y-2 w-full">
                       <textarea
                         ref={editTextAreaRef}
                         value={editingContent}
@@ -330,7 +332,7 @@ const ChatInterface = () => {
 
         <form 
           onSubmit={handleFormSubmit} 
-          className={`flex items-end border border-secondary-foreground/30 bg-white text-black lg:w-[70%] w-[100%] px-4 py-1.5 min-h-[52px] transition-all duration-300 mx-auto mb-2 ${isExpanded ? "rounded-2xl" : "rounded-full"}`}
+          className={`flex items-end border border-secondary-foreground/30 bg-white text-black lg:w-[70%] w-[100%] px-4 py-1.5 min-h-[52px] transition-all duration-300 mx-auto my-1.5 ${isExpanded ? "rounded-2xl" : "rounded-full"}`}
         >
           <textarea
             ref={textAreaRef}
