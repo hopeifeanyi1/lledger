@@ -89,9 +89,9 @@ const DecisionsPage = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 pt-8 lg:pt-24">
+    <div className="container mx-auto px-4 pt-16 lg:pt-24">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-4xl font-semibold">
+        <h1 className="lg:text-4xl text-3xl font-semibold">
           Your <span className="text-[#D1376A]">Decisions Log</span>
         </h1>
         <Link href="/new-decision">
@@ -165,7 +165,7 @@ const DecisionsPage = () => {
         </div>
       </div>
 
-      <div className="overflow-auto rounded-lg shadow">
+      <div className="overflow-x-scroll rounded-lg shadow w-screen lg:w-full">
         <Table>
           <TableHeader className="bg-[#D1376A] text-white">
             <TableRow>
