@@ -230,7 +230,7 @@ const ChatInterface = () => {
                 {suggestedQuestions.map((question, index) => (
                   <button
                     key={index}
-                    className="bg-secondary hover:bg-muted-foreground text-left px-4 py-3 rounded-lg text-sm flex items-start transition-colors"
+                    className="bg-secondary hover:bg-foreground/20 text-left px-4 py-3 rounded-lg text-sm flex items-start transition-colors"
                     onClick={() => {
                       if (textAreaRef.current) {
                         textAreaRef.current.value = question;

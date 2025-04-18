@@ -7,6 +7,14 @@ export const Bars : React.FC<IconProps> = ({className}) => {
       </svg>      
     );
   };
+export const ArrowDown : React.FC<IconProps> = ({className}) => {
+    return (
+      <svg width="16" height="9" viewBox="0 0 16 9" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <path d="M0.083252 8.16667L7.99992 0.25L15.9166 8.16667H0.083252Z" fill="white"/>
+      </svg>
+
+    );
+  };
   export const SendIcon : React.FC<IconProps> = ({className}) => {
     return (
         <svg width="76" height="76" viewBox="0 0 76 76" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>

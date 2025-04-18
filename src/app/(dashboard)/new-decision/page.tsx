@@ -2,6 +2,7 @@
 "use client";
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { ArrowDown } from '@/components/store/Icon';
 
 const NewDecisionPage = () => {
   const router = useRouter();
@@ -27,61 +28,48 @@ const NewDecisionPage = () => {
   };
 
   return (
-    <div className="p-8 max-w-3xl mx-auto h-full flex flex-col">
-      <div className="mb-8">
-        <h1 className="text-4xl font-serif mb-1">
+    <div className="py-8 px-8 lg:px-12 max-w-3xl h-full flex flex-col lg:mt-1 mt-5">
+      <div className="mb-8 lg:mb-14">
+        <h1 className="lg:text-4xl text-3xl font-semibold mb-1">
           Log a New <span className="text-[#D1376A]">Decision</span>
         </h1>
       </div>
 
       <div className="space-y-10 flex-grow">
         {/* Decision Text Input */}
-        <div className="space-y-2">
-          <label htmlFor="decision" className="text-lg font-medium">
+        <div className="">
+          <label htmlFor="decision" className="text-[16px] font-medium text-foreground/85">
             What decision are you trying to make?
           </label>
           <textarea
             id="decision"
-            className="w-full min-h-32 p-4 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-[#D1376A]/30 transition"
-            placeholder="Describe the decision you're facing..."
+            className="w-full min-h-32 p-4 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-[#D1376A]/30 transition mt-2.5"
+            placeholder="Describe the decision here..."
             value={decision}
             onChange={(e) => setDecision(e.target.value)}
           />
         </div>
 
         {/* Category Selector */}
-        <div className="space-y-2">
-          <label htmlFor="category" className="text-lg font-medium">
-            Decision Category <span className="text-muted-foreground text-sm">(Optional)</span>
+        <div className="">
+          <label htmlFor="category" className="text-[16px] font-medium text-foreground/85">
+            Decision Category <span className="text-muted-foreground">(Optional)</span>
           </label>
           <div className="relative">
             <input
               id="category"
               type="text"
-              className="w-full p-4 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-[#D1376A]/30 transition"
+              className="w-full p-4 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-[#D1376A]/30 transition mt-2.5"
               placeholder="Select or type a category"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               onFocus={() => setShowCategories(true)}
             />
             <button 
-              className="absolute right-0 top-0 h-full px-4 text-muted-foreground bg-secondary rounded-r-md border-l border-border"
+              className="absolute right-0 top-[10px] h-[58px] my-auto px-4 text-muted-foreground bg-[#D1376A] rounded-r-md border-l border-border"
               onClick={() => setShowCategories(!showCategories)}
             >
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                width="20" 
-                height="20" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-                strokeLinejoin="round"
-                className={`transition ${showCategories ? 'rotate-180' : ''}`}
-              >
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
+              <ArrowDown className={`transition ${showCategories ? '' : 'rotate-180'}`}/>
             </button>
             
             {showCategories && (
@@ -104,13 +92,13 @@ const NewDecisionPage = () => {
         </div>
 
         {/* Urgency Level */}
-        <div className="space-y-4">
-          <label className="text-lg font-medium">
+        <div className="space-y-4 mt-8 ">
+          <label className="text-[16px] font-medium text-foreground/85 ">
             Urgency Level
           </label>
-          <div className="flex space-x-4">
+          <div className="flex space-x-4 mt-4">
             <button 
-              className={`px-6 py-2 rounded-full border ${
+              className={`px-3 py-2 rounded-xl border ${
                 urgency === 'Now' 
                   ? 'border-[#D1376A] text-[#D1376A] bg-[#D1376A]/10' 
                   : 'border-border hover:bg-secondary/80'
@@ -120,7 +108,7 @@ const NewDecisionPage = () => {
               Now
             </button>
             <button 
-              className={`px-6 py-2 rounded-full border ${
+              className={`px-3 py-2 rounded-xl border ${
                 urgency === 'Soon'
                   ? 'border-[#D1376A] text-[#D1376A] bg-[#D1376A]/10' 
                   : 'border-border hover:bg-secondary/80'
@@ -130,7 +118,7 @@ const NewDecisionPage = () => {
               Soon
             </button>
             <button 
-              className={`px-6 py-2 rounded-full border ${
+              className={`px-3 py-2 rounded-xl border ${
                 urgency === 'Later'
                   ? 'border-[#D1376A] text-[#D1376A] bg-[#D1376A]/10' 
                   : 'border-border hover:bg-secondary/80'
@@ -144,9 +132,9 @@ const NewDecisionPage = () => {
       </div>
 
       {/* Next Button */}
-      <div className="mt-auto pt-6">
+      <div className="">
         <button 
-          className="bg-[#D1376A] text-white px-10 py-4 rounded-lg text-lg font-medium hover:bg-[#C02659] transition ml-auto block"
+          className="bg-[#D1376A] border border-[#D1376A] text-white px-20 py-4 rounded-xl shadow-4xl text-lg font-medium hover:bg-[#C02659] transition ml-auto block"
           onClick={handleNext}
         >
           NEXT
