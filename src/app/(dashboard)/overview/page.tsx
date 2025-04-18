@@ -206,11 +206,11 @@ const OverviewPage = () => {
   };
 
   return (
-    <div className='pt-4 sm:pt-6 md:pt-12 px-3 sm:px-4 md:pl-10 md:pr-16 bg-background dark:bg-background overflow-y-auto h-full'>
+    <div className='pt-8 md:pt-12 px-3 sm:px-4 md:pl-10 md:pr-16 bg-background dark:bg-background overflow-y-auto h-full'>
       <div className='grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-10'>
         <div className='col-span-1 md:col-span-3 mt-2 sm:mt-3'>
             <div className='pt-4 sm:pt-9'>
-                <p className='font-medium text-lg sm:text-xl md:text-2xl'>Hello <span className='text-[#D1376A]'>{userName}!</span></p>
+                <p className='font-medium text-xl md:text-2xl'>Hello <span className='text-[#D1376A]'>{userName}!</span></p>
                 <p className='text-xl sm:text-2xl md:text-4xl font-semibold w-full lg:w-[500px] mt-3 sm:mt-5 md:mt-6 leading-tight lg:leading-[50px]'>
                   Ready to think through something today?
                 </p>
@@ -275,11 +275,11 @@ const OverviewPage = () => {
                 
                 <TabsContent value="recent-decisions">
                     <Card className="shadow-none border-0 bg-transparent mt-4 sm:mt-6">
-                    <CardContent className='px-0 sm:px-6'>
-                        <Carousel className="w-[89%] md:w-[78%]">
+                    <CardContent className='px-6'>
+                        <Carousel className="w-[91%] md:w-[78%]">
                         <CarouselContent>
                             {mockDecisions.map((decision) => (
-                            <CarouselItem key={decision.id} className="basis-1/2 sm:basis-1/2 md:basis-1/3 mx-1 md:mx-0">
+                            <CarouselItem key={decision.id} className="basis-1/2 md:basis-1/3 mx-0.5 md:mx-0">
                                 <DecisionCard decision={decision} />
                             </CarouselItem>
                             ))}
@@ -319,7 +319,7 @@ const OverviewPage = () => {
             </div>
         </div>
         {/* right content - for desktop only */}
-        <div className='hidden md:block md:col-span-2 mt-10'>
+        <div className='hidden md:block md:col-span-2 lg:mt-10'>
           <div className='grid grid-cols-1 h-[400px] gap-y-16'>
             {/* Profile Card */}
             <Card className="p-6 relative h-[200px]">
