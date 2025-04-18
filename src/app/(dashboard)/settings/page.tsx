@@ -36,7 +36,7 @@ const SettingsPage = () => {
   };
 
   return (
-    <div className="px-8 lg:pt-8 pt-12 lg:pb-8 pb-12 max-w-4xl mx-auto overflow-y-scroll h-full">
+    <div className="px-8 lg:pt-8 pt-12 lg:pb-8 pb-12 max-w-4xl mx-auto lg:mx-4 overflow-y-scroll h-full">
       <div className="mb-8">
         <h1 className="lg:text-4xl text-3xl font-serif mb-1">
           Account <span className="text-[#D1376A]">Settings</span>

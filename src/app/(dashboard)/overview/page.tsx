@@ -3,13 +3,15 @@ import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Calendar } from "@/components/ui/calendar"
 import { Info, Bell, Plus, Calendar as CalendarIcon, BarChart } from 'lucide-react';
 import { format } from 'date-fns';
-import { motion } from 'framer-motion';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { motion, AnimatePresence, stagger } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
@@ -59,11 +61,51 @@ const mockStats: Stats = {
   ]
 };
 
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 300, damping: 24 }
+  }
+};
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const fadeInVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { duration: 0.6, ease: "easeInOut" }
+  }
+};
+
+const scaleInVariants = {
+  hidden: { scale: 0.9, opacity: 0 },
+  visible: {
+    scale: 1,
+    opacity: 1,
+    transition: { type: "spring", stiffness: 300, damping: 25 }
+  }
+};
+
 interface DecisionCardProps {
   decision: Decision;
+  index: number;
 }
 
-const DecisionCard: React.FC<DecisionCardProps> = ({ decision }) => {
+const DecisionCard: React.FC<DecisionCardProps> = ({ decision, index }) => {
   const getOutcomeStyles = (outcome: string) => {
     switch(outcome) {
       case 'Good':
@@ -79,14 +121,29 @@ const DecisionCard: React.FC<DecisionCardProps> = ({ decision }) => {
 
   return (
     <motion.div
-      whileHover={{ scale: 1.05 }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ 
+        type: "spring", 
+        stiffness: 300, 
+        damping: 20, 
+        delay: index * 0.05 
+      }}
+      whileHover={{ 
+        scale: 1.05, 
+        boxShadow: "0px 10px 20px rgba(0, 0, 0, 0.1)"
+      }}
       className=''
     >
       <Card className="h-48 w-full sm:w-[145px] relative overflow-hidden my-2 mx-auto sm:ml-2">
-        <div className={`absolute top-0 right-0 px-2 py-1 text-xs font-medium rounded-bl-md ${getOutcomeStyles(decision.outcome)}`}>
+        <motion.div 
+          className={`absolute top-0 right-0 px-2 py-1 text-xs font-medium rounded-bl-md ${getOutcomeStyles(decision.outcome)}`}
+          initial={{ x: 50 }}
+          animate={{ x: 0 }}
+          transition={{ type: "spring", stiffness: 400, damping: 17, delay: 0.2 + index * 0.05 }}
+        >
           {decision.outcome}
-        </div>
+        </motion.div>
         <CardHeader className="h-full w-full px-2 flex flex-col justify-between">
           <CardTitle className="text-sm m-auto text-center">{decision.title}</CardTitle>
           <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">
@@ -111,7 +168,12 @@ const UserAvatar: React.FC<{ user: any }> = ({ user }) => {
   };
   
   return (
-    <div className="rounded-full overflow-hidden border-4 border-[#D1376A] w-16 h-16 sm:w-24 sm:h-24">
+    <motion.div 
+      initial={{ scale: 0.8, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ type: "spring", stiffness: 300, damping: 15, delay: 0.3 }}
+      className="rounded-full overflow-hidden border-4 border-[#D1376A] w-16 h-16 sm:w-24 sm:h-24"
+    >
       {user?.user_metadata?.avatar_url ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img 
@@ -124,7 +186,7 @@ const UserAvatar: React.FC<{ user: any }> = ({ user }) => {
           <span className="text-lg sm:text-xl font-bold">{getUserInitials()}</span>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };
 
@@ -133,18 +195,37 @@ interface QuickActionProps {
   icon: React.ReactNode;
   label: string;
   href: string;
+  index: number;
 }
 
-const QuickActionButton: React.FC<QuickActionProps> = ({ icon, label, href }) => (
-  <motion.div whileHover={{ scale: 1.05 }} transition={{ type: "spring", stiffness: 300 }}>
+const QuickActionButton: React.FC<QuickActionProps> = ({ icon, label, href, index }) => (
+  <motion.div 
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ 
+      type: "spring", 
+      stiffness: 300, 
+      delay: 0.3 + index * 0.1 
+    }}
+    whileHover={{ 
+      scale: 1.05, 
+      boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.15)",
+      backgroundColor: "rgba(209, 55, 106, 0.05)"
+    }}
+    className="rounded-md"
+  >
     <Link href={href}>
       <Button 
         variant="outline" 
         className="h-12 sm:h-14 w-full flex items-center justify-start gap-2 border-2 border-[#D1376A]/20 hover:bg-[#D1376A]/10 hover:border-[#D1376A] transition-all px-2"
       >
-        <div className="bg-[#D1376A]/20 p-1.5 rounded-full">
+        <motion.div 
+          className="bg-[#D1376A]/20 p-1.5 rounded-full"
+          whileHover={{ backgroundColor: "rgba(209, 55, 106, 0.4)" }}
+          transition={{ duration: 0.2 }}
+        >
           {icon}
-        </div>
+        </motion.div>
         <span className="text-xs sm:text-sm">{label}</span>
       </Button>
     </Link>
@@ -158,6 +239,8 @@ const OverviewPage = () => {
   const router = useRouter();
   const [date, setDate] = React.useState<Date | undefined>(new Date())
   const [today] = React.useState(new Date())
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [selectedTab, setSelectedTab] = useState("quick-stats");
 
   useEffect(() => {
     const checkUser = async () => {
@@ -191,7 +274,24 @@ const OverviewPage = () => {
   }, [router]);
 
   if (loading) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <motion.div
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.5, 1, 0.5]
+          }}
+          transition={{
+            duration: 1.5,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          className="text-lg font-medium text-[#D1376A]"
+        >
+          Loading...
+        </motion.div>
+      </div>
+    );
   }
 
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
@@ -206,172 +306,397 @@ const OverviewPage = () => {
   };
 
   return (
-    <div className='pt-8 md:pt-12 px-3 sm:px-4 md:pl-10 md:pr-16 bg-background dark:bg-background overflow-y-auto h-full'>
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className='pt-8 md:pt-12 px-3 sm:px-4 md:pl-10 md:pr-16 bg-background dark:bg-background overflow-y-auto h-full'
+    >
       <div className='grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-10'>
         <div className='col-span-1 md:col-span-3 mt-2 sm:mt-3'>
-            <div className='pt-4 sm:pt-9'>
-                <p className='font-medium text-xl md:text-2xl'>Hello <span className='text-[#D1376A]'>{userName}!</span></p>
-                <p className='text-xl sm:text-2xl md:text-4xl font-semibold w-full lg:w-[500px] mt-3 sm:mt-5 md:mt-6 leading-tight lg:leading-[50px]'>
+            <motion.div 
+              initial="hidden"
+              animate="visible"
+              variants={containerVariants}
+              className='pt-4 sm:pt-9'
+            >
+                <motion.p 
+                  variants={itemVariants}
+                  className='font-medium text-xl md:text-2xl'
+                >
+                  Hello <motion.span 
+                    className='text-[#D1376A]'
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ 
+                      delay: 0.5, 
+                      duration: 0.5,
+                      type: "spring",
+                      stiffness: 400
+                    }}
+                  >
+                    {userName}!
+                  </motion.span>
+                </motion.p>
+                <motion.p 
+                  variants={itemVariants}
+                  className='text-xl sm:text-2xl md:text-4xl font-semibold w-full lg:w-[500px] mt-3 sm:mt-5 md:mt-6 leading-tight lg:leading-[50px]'
+                >
                   Ready to think through something today?
-                </p>
+                </motion.p>
                 
-                {/* Quick Actions Section - Added as per recommendation */}
-                <div className="mt-6 sm:mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 w-full sm:w-[76%]">
+                {/* Quick Actions Section */}
+                <motion.div 
+                  variants={containerVariants}
+                  className="mt-6 sm:mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 w-full sm:w-[76%]"
+                >
                   <QuickActionButton 
                     icon={<Plus className="h-3 w-3 text-[#D1376A]" />} 
                     label="New Decision" 
-                    href="/new-decision" 
+                    href="/new-decision"
+                    index={0}
                   />
                   <QuickActionButton 
                     icon={<CalendarIcon className="h-4 w-4 sm:h-5 sm:w-5 text-[#D1376A]" />} 
                     label="View Reflections" 
-                    href="/reflections" 
+                    href="/reflections"
+                    index={1}
                   />
                   <QuickActionButton 
                     icon={<BarChart className="h-4 w-4 sm:h-5 sm:w-5 text-[#D1376A]" />} 
                     label="See Insights" 
-                    href="/insights" 
+                    href="/insights"
+                    index={2}
                   />
-                </div>
+                </motion.div>
                 
-                <hr className='border-t-[1px] border-black/40 dark:border-white/40 mt-8 sm:mt-10 md:mt-12 w-full md:w-[76%]'/>
-            </div>
-            <div className="mt-4 md:mt-10">
-                <Tabs defaultValue="quick-stats" className="w-full ">
-                <TabsList className="ml-0 md:ml-1 bg-transparent gap-x-2 md:gap-x-5 text-black dark:text-white overflow-x-auto max-w-full py-7">
-                    <TabsTrigger value="quick-stats" className='text-xs sm:text-sm text-black/55 dark:text-white/55 data-[state=active]:bg-[#D1376A]/20 data-[state=active]:text-[#D1376A] dark:data-[state=active]:bg-[#D1376A]/20 dark:data-[state=active]:text-[#D1376A] data-[state=active]:rounded-md whitespace-nowrap'>Quick Stats</TabsTrigger>
-                    <TabsTrigger value="recent-decisions" className='text-xs sm:text-sm text-black/55 dark:text-white/55 data-[state=active]:bg-[#D1376A]/20 data-[state=active]:text-[#D1376A] dark:data-[state=active]:bg-[#D1376A]/20 dark:data-[state=active]:text-[#D1376A] whitespace-nowrap data-[state=active]:rounded-md'>Recent Decisions Timeline</TabsTrigger>
-                    <TabsTrigger value="top-categories" className='text-xs sm:text-sm text-black/55 dark:text-white/55 data-[state=active]:bg-[#D1376A]/20 data-[state=active]:text-[#D1376A] dark:data-[state=active]:bg-[#D1376A]/20 dark:data-[state=active]:text-[#D1376A] whitespace-nowrap data-[state=active]:rounded-md'>Top Categories</TabsTrigger>
+                <motion.hr 
+                  variants={itemVariants}
+                  className='border-t-[1px] border-black/40 dark:border-white/40 mt-8 sm:mt-10 md:mt-12 w-full md:w-[76%]'
+                />
+            </motion.div>
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.5 }}
+              className="mt-4 md:mt-10"
+            >
+                <Tabs 
+                  defaultValue="quick-stats" 
+                  className="w-full"
+                  onValueChange={(value) => setSelectedTab(value)}
+                >
+                <TabsList className="bg-transparent gap-x-2 md:gap-x-5 text-black dark:text-white overflow-x-auto max-w-full py-7">
+                    <motion.div
+                      whileHover={{ y: -2 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                    >
+                      <TabsTrigger 
+                        value="quick-stats" 
+                        className='text-xs sm:text-sm text-black/55 dark:text-white/55 data-[state=active]:bg-[#D1376A]/20 data-[state=active]:text-[#D1376A] dark:data-[state=active]:bg-[#D1376A]/20 dark:data-[state=active]:text-[#D1376A] data-[state=active]:rounded-md whitespace-nowrap'
+                      >
+                        Quick Stats
+                      </TabsTrigger>
+                    </motion.div>
+                    <motion.div
+                      whileHover={{ y: -2 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                    >
+                      <TabsTrigger 
+                        value="recent-decisions" 
+                        className='text-xs sm:text-sm text-black/55 dark:text-white/55 data-[state=active]:bg-[#D1376A]/20 data-[state=active]:text-[#D1376A] dark:data-[state=active]:bg-[#D1376A]/20 dark:data-[state=active]:text-[#D1376A] whitespace-nowrap data-[state=active]:rounded-md'
+                      >
+                        Recent Decisions Timeline
+                      </TabsTrigger>
+                    </motion.div>
+                    <motion.div
+                      whileHover={{ y: -2 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                    >
+                      <TabsTrigger 
+                        value="top-categories" 
+                        className='text-xs sm:text-sm text-black/55 dark:text-white/55 data-[state=active]:bg-[#D1376A]/20 data-[state=active]:text-[#D1376A] dark:data-[state=active]:bg-[#D1376A]/20 dark:data-[state=active]:text-[#D1376A] whitespace-nowrap data-[state=active]:rounded-md'
+                      >
+                        Top Categories
+                      </TabsTrigger>
+                    </motion.div>
                 </TabsList>
                 
-                <TabsContent value="quick-stats" className=''>
-                    <Card className='border-0 shadow-none gap-4 sm:gap-6 bg-transparent w-full md:w-[68%]'>
-                        <CardContent className="px-2 sm:px-6 mt-3 md:mt-5">
-                          <div className="flex flex-col sm:flex-row justify-between gap-4 sm:gap-6 md:gap-0 mb-6 sm:mb-8 md:mb-12">
-                            <div>
-                                <p className="text-sm md:text-[15px] font-medium">Total Decisions <Info className='text-black/30 dark:text-white/30 w-[11px] h-[11px] inline ml-1 md:ml-3'/> </p>
-                                <p className="text-2xl sm:text-3xl md:text-5xl font-medium text-[#D1376A] mt-1 sm:mt-2 md:mt-2">{mockStats.totalDecisions}</p>
+                <AnimatePresence mode="wait">
+                  <TabsContent key="quick-stats" value="quick-stats" className=''>
+                    <motion.div
+                      key="quick-stats"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <Card className='border-0 shadow-none gap-4 sm:gap-6 bg-transparent w-full md:w-[68%]'>
+                          <CardContent className="px-2 sm:px-6 mt-3 md:mt-5">
+                            <motion.div 
+                              initial="hidden"
+                              animate="visible"
+                              variants={containerVariants}
+                              className="flex flex-col sm:flex-row justify-between gap-4 sm:gap-6 md:gap-0 mb-6 sm:mb-8 md:mb-12"
+                            >
+                              <motion.div variants={itemVariants}>
+                                  <p className="text-sm md:text-[15px] font-medium">Total Decisions <Info className='text-black/30 dark:text-white/30 w-[11px] h-[11px] inline ml-1 md:ml-3'/> </p>
+                                  <motion.p 
+                                    initial={{ opacity: 0, scale: 0.5 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ delay: 0.2, type: "spring", stiffness: 400 }}
+                                    className="text-2xl sm:text-3xl md:text-5xl font-medium text-[#D1376A] mt-1 sm:mt-2 md:mt-2"
+                                  >
+                                    {mockStats.totalDecisions}
+                                  </motion.p>
+                              </motion.div>
+                              <motion.div variants={itemVariants} className="mt-2 sm:mt-0">
+                                  <p className="text-sm md:text-[15px] font-medium">Pending Reflections <Info className='text-black/30 dark:text-white/30 w-[11px] h-[11px] inline ml-1 md:ml-3'/></p>
+                                  <motion.p 
+                                    initial={{ opacity: 0, scale: 0.5 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ delay: 0.3, type: "spring", stiffness: 400 }}
+                                    className="text-2xl sm:text-3xl md:text-5xl font-medium text-[#D1376A] mt-1 sm:mt-2 md:mt-2"
+                                  >
+                                    {mockStats.pendingReflections}
+                                  </motion.p>
+                              </motion.div>
+                            </motion.div>
+                            
+                            <motion.div 
+                              variants={containerVariants}
+                              className="space-y-4 sm:space-y-6 md:space-y-8"
+                            >
+                                <motion.p variants={itemVariants} className="text-xs md:text-sm font-medium">
+                                  Regret Analysis (% good Outcomes) <Info className='text-black/30 dark:text-white/30 w-[11px] h-[11px] inline ml-1 md:ml-3'/>
+                                </motion.p>
+                                <motion.span 
+                                  variants={itemVariants}
+                                  className={`text-xs md:text-sm font-medium ${getOutcomeColor(mockStats.goodOutcomePercentage)}`}
+                                >
+                                  {mockStats.goodOutcomePercentage}% Good Outcome
+                                </motion.span>
+                                <motion.div
+                                  variants={itemVariants}
+                                  className="mt-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden"
+                                >
+                                  <motion.div 
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${mockStats.goodOutcomePercentage}%` }}
+                                    transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
+                                    className={`h-full ${getProgressBarColor(mockStats.goodOutcomePercentage)}`}
+                                  />
+                                </motion.div>
+                            </motion.div>
+                          </CardContent>
+                      </Card>
+                    </motion.div>
+                  </TabsContent>
+                  
+                  <TabsContent key="recent-decisions" value="recent-decisions">
+                    <motion.div
+                      key="recent-decisions"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <Card className="shadow-none border-0 bg-transparent mt-4 sm:mt-6">
+                        <CardContent className='px-6'>
+                          <Carousel className="w-[91%] md:w-[78%]">
+                            <CarouselContent>
+                              {mockDecisions.map((decision, index) => (
+                                <CarouselItem key={decision.id} className="basis-1/2 md:basis-1/3 mx-0.5 md:mx-0">
+                                  <DecisionCard decision={decision} index={index} />
+                                </CarouselItem>
+                              ))}
+                            </CarouselContent>
+                            <div className="flex justify-center mt-2 sm:mt-4">
+                              <motion.div
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.95 }}
+                                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                              >
+                                <CarouselPrevious className="mr-1" />
+                              </motion.div>
+                              <motion.div
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.95 }}
+                                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                              >
+                                <CarouselNext />
+                              </motion.div>
                             </div>
-                            <div className="mt-2 sm:mt-0">
-                                <p className="text-sm md:text-[15px] font-medium">Pending Reflections <Info className='text-black/30 dark:text-white/30 w-[11px] h-[11px] inline ml-1 md:ml-3'/></p>
-                                <p className="text-2xl sm:text-3xl md:text-5xl font-medium text-[#D1376A] mt-1 sm:mt-2 md:mt-2">{mockStats.pendingReflections}</p>
-                            </div>
-                          </div>
-                          
-                          <div className="space-y-4 sm:space-y-6 md:space-y-8">
-                              <p className="text-xs md:text-sm font-medium">Regret Analysis (% good Outcomes) <Info className='text-black/30 dark:text-white/30 w-[11px] h-[11px] inline ml-1 md:ml-3'/></p>
-                              <span className={`text-xs md:text-sm font-medium ${getOutcomeColor(mockStats.goodOutcomePercentage)}`}>
-                                {mockStats.goodOutcomePercentage}% Good Outcome
-                              </span>
-                              <Progress 
-                                value={mockStats.goodOutcomePercentage} 
-                                className="mt-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2.5"
-                                indicatorClassName={getProgressBarColor(mockStats.goodOutcomePercentage)}
-                              />
-                          </div>
+                          </Carousel>
                         </CardContent>
-                    </Card>
-                </TabsContent>
-                
-                <TabsContent value="recent-decisions">
-                    <Card className="shadow-none border-0 bg-transparent mt-4 sm:mt-6">
-                    <CardContent className='px-6'>
-                        <Carousel className="w-[91%] md:w-[78%]">
-                        <CarouselContent>
-                            {mockDecisions.map((decision) => (
-                            <CarouselItem key={decision.id} className="basis-1/2 md:basis-1/3 mx-0.5 md:mx-0">
-                                <DecisionCard decision={decision} />
-                            </CarouselItem>
+                      </Card>
+                    </motion.div>
+                  </TabsContent>
+                  
+                  <TabsContent key="top-categories" value="top-categories">
+                    <motion.div
+                      key="top-categories"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <Card className="border-0 bg-transparent shadow-none w-full sm:w-[70%] mt-4 sm:mt-8">
+                        <CardContent className="px-2 sm:px-6">
+                          <motion.div 
+                            initial="hidden"
+                            animate="visible"
+                            variants={containerVariants}
+                            className="space-y-3 sm:space-y-4 md:space-y-8"
+                          >
+                            {mockStats.categories.map((category, index) => (
+                              <motion.div 
+                                key={category.name}
+                                variants={itemVariants}
+                                custom={index}
+                                className="space-y-1 md:space-y-2"
+                              >
+                                <div className="flex justify-between">
+                                  <span className="text-sm md:text-base font-medium">{category.name}</span>
+                                  <span className="text-sm md:text-base">{category.percentage}%</span>
+                                </div>
+                                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden mt-2 sm:mt-3">
+                                  <motion.div 
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${category.percentage}%` }}
+                                    transition={{ delay: 0.3 + index * 0.1, duration: 0.8, ease: "easeOut" }}
+                                    className="bg-[#D1376A] h-full rounded-full"
+                                  />
+                                </div>
+                              </motion.div>
                             ))}
-                        </CarouselContent>
-                        <div className="flex justify-center mt-2 sm:mt-4">
-                            <CarouselPrevious className="mr-1" />
-                            <CarouselNext />
-                        </div>
-                        </Carousel>
-                    </CardContent>
-                    </Card>
-                </TabsContent>
-                
-                <TabsContent value="top-categories">
-                    <Card className="border-0 bg-transparent shadow-none w-full sm:w-[70%] mt-4 sm:mt-8">
-                    <CardContent className="px-2 sm:px-6">
-                        <div className="space-y-3 sm:space-y-4 md:space-y-8">
-                        {mockStats.categories.map((category, index) => (
-                            <div key={index} className="space-y-1 md:space-y-2">
-                            <div className="flex justify-between">
-                                <span className="text-sm md:text-base font-medium">{category.name}</span>
-                                <span className="text-sm md:text-base">{category.percentage}%</span>
-                            </div>
-                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden mt-2 sm:mt-3">
-                                <div 
-                                className="bg-[#D1376A] h-full rounded-full" 
-                                style={{ width: `${category.percentage}%` }}
-                                />
-                            </div>
-                            </div>
-                        ))}
-                        </div>
-                    </CardContent>
-                    </Card>
-                </TabsContent>
+                          </motion.div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  </TabsContent>
+                </AnimatePresence>
                 </Tabs>
-            </div>
+            </motion.div>
         </div>
         {/* right content - for desktop only */}
         <div className='hidden md:block md:col-span-2 lg:mt-10'>
-          <div className='grid grid-cols-1 h-[400px] gap-y-16'>
+          <motion.div 
+            initial="hidden"
+            animate="visible"
+            variants={containerVariants}
+            className='grid grid-cols-1 h-[400px] gap-y-16'
+          >
             {/* Profile Card */}
-            <Card className="p-6 relative h-[200px]">
-              <div className="absolute top-6 right-6">
-                <motion.div 
-                  whileHover={{ scale: 1.1 }}
-                  className="bg-[#D1376A] rounded-full w-10 h-10 flex items-center justify-center cursor-pointer"
-                >
-                  <Bell className="text-white w-5 h-5" />
-                </motion.div>
-              </div>
-              
-              <div className="flex items-center mt-4">
-                <div className="relative">
-                  <UserAvatar user={user} />
+            <motion.div variants={scaleInVariants}>
+              <Card className="p-6 relative h-[200px]">
+                <div className="absolute top-6 right-6">
+                  <motion.div 
+                    whileHover={{ scale: 1.1, rotate: 15 }}
+                    whileTap={{ scale: 0.9 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                    className="bg-[#D1376A] rounded-full w-10 h-10 flex items-center justify-center cursor-pointer"
+                  >
+                    <motion.div
+                      animate={{ 
+                        y: [0, -2, 0],
+                        rotate: [0, 5, 0, -5, 0]
+                      }}
+                      transition={{ 
+                        duration: 2, 
+                        repeat: Infinity, 
+                        repeatType: "reverse", 
+                        ease: "easeInOut",
+                        repeatDelay: 3
+                      }}
+                    >
+                      <Bell className="text-white w-5 h-5" />
+                    </motion.div>
+                  </motion.div>
                 </div>
                 
-                <div className="ml-5">
-                  <div className="flex items-center">
-                    <h3 className="text-xl font-bold">{userName}</h3>
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#D1376A] mx-3"></div>
+                <div className="flex items-center mt-4">
+                  <div className="relative">
+                    <UserAvatar user={user} />
                   </div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    {mockStats.pendingReflections} pending reflections
-                  </p>
+                  
+                  <motion.div 
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.5, duration: 0.5 }}
+                    className="ml-5"
+                  >
+                    <div className="flex items-center">
+                      <h3 className="text-xl font-bold">{userName}</h3>
+                      <motion.div 
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: 0.7, type: "spring", stiffness: 400 }}
+                        className="w-1.5 h-1.5 rounded-full bg-[#D1376A] mx-3"
+                      ></motion.div>
+                    </div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                      {mockStats.pendingReflections} pending reflections
+                    </p>
+                  </motion.div>
                 </div>
-              </div>
-            </Card>
+              </Card>
+            </motion.div>
             
             {/* Calendar Card */}
-            <Card className="p-6">
-              <CardContent className="p-0 w-full">
-                <div className="mb-4">
-                  <div className='flex items-center'>
-                    <span className="text-lg font-medium">{format(today, 'MMMM d, yyyy')}</span> <span className="w-1.5 h-1.5 rounded-full bg-[#D1376A] ml-3"/>
-                  </div>
-                  <h2 className="text-2xl font-bold mt-2">Today</h2>
-                </div>
-                
-                <Calendar
-                  mode="single"
-                  selected={date}
-                  onSelect={setDate}
-                  className="w-full border-0 p-0"
-                  classNames={{
-                    day_selected: "bg-[#D1376A] text-white hover:bg-[#D1376A] hover:text-white focus:bg-[#D1376A] focus:text-white",
-                    day_today: "bg-[#D1376A]/20 text-[#D1376A]"
-                  }}
-                />
-              </CardContent>
-            </Card>
-          </div>
+            <motion.div variants={scaleInVariants}>
+              <Card className="p-6">
+                <CardContent className="p-0 w-full">
+                  <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5, duration: 0.4 }}
+                    className="mb-4"
+                  >
+                    <motion.div 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.6, duration: 0.3 }}
+                      className='flex items-center'
+                    >
+                      <span className="text-lg font-medium">{format(today, 'MMMM d, yyyy')}</span> 
+                      <motion.span 
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: 0.7, type: "spring", stiffness: 400 }}
+                        className="w-1.5 h-1.5 rounded-full bg-[#D1376A] ml-3"
+                      />
+                    </motion.div>
+                    <motion.h2 
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.8, duration: 0.4 }}
+                      className="text-2xl font-bold mt-2"
+                    >
+                      Today
+                    </motion.h2>
+                  </motion.div>
+                  
+                  <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.9, type: "spring", stiffness: 300, damping: 20 }}
+                  >
+                    <Calendar
+                      mode="single"
+                      selected={date}
+                      onSelect={setDate}
+                      className="w-full border-0 p-0"
+                      classNames={{
+                        day_selected: "bg-[#D1376A] text-white hover:bg-[#D1376A] hover:text-white focus:bg-[#D1376A] focus:text-white",
+                        day_today: "bg-[#D1376A]/20 text-[#D1376A]"
+                      }}
+                    />
+                  </motion.div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </motion.div>
         </div>
 
         {/* Mobile only - Profile Info */}
@@ -400,7 +725,7 @@ const OverviewPage = () => {
           </Card>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }
                        
