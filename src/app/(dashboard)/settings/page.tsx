@@ -100,7 +100,7 @@ const SettingsPage = () => {
         initial="hidden"
         animate="visible"
       >
-        <h1 className="lg:text-4xl text-3xl font-serif mb-1">
+        <h1 className="lg:text-4xl text-3xl mb-1">
           Account <span className="text-[#D1376A]">Settings</span>
         </h1>
         <p className="text-muted-foreground">
