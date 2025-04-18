@@ -3,27 +3,45 @@
 import React, { useState } from 'react'
 import { SIDENAV_ITEMS } from '@/constants'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation';
-import { Bars } from './Icon';
-import { Sheet, SheetContent, SheetClose, SheetTrigger, SheetHeader, SheetTitle } from "../ui/sheet";
-import { SideNavItem } from '@/types';
+import { usePathname, useRouter } from 'next/navigation'
+import { Bars } from './Icon'
+import { Sheet, SheetContent, SheetClose, SheetTrigger, SheetHeader, SheetTitle } from "../ui/sheet"
+import { SideNavItem } from '@/types'
+import { supabase } from '@/lib/supabase'
 
 const DashboardSide = () => {
-  const pathname = usePathname();
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const pathname = usePathname()
+  const router = useRouter()
+  const [isSheetOpen, setIsSheetOpen] = useState(false)
   
-  const regularLinks = SIDENAV_ITEMS.filter(item => item.id < 5);
-  const bottomLinks = SIDENAV_ITEMS.filter(item => item.id >= 5);
+  const regularLinks = SIDENAV_ITEMS.filter(item => item.id < 5)
+  const bottomLinks = SIDENAV_ITEMS.filter(item => item.id >= 5)
 
   const isPathActive = (path: string) => {
-    if (path === '/') return pathname === '/';
-    return pathname.startsWith(path);
-  };
+    if (path === '/') return pathname === '/'
+    return pathname.startsWith(path)
+  }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut()
+      if (error) throw error
+      
+      // Redirect to login page after successful logout
+      router.push('/login')
+    } catch (error) {
+      console.error('Error logging out:', error)
+    }
+  }
+
   const handleLinkClick = (item: SideNavItem) => {
-    setIsSheetOpen(false);
-  };
+    setIsSheetOpen(false)
+    
+    // If this is the logout item (id 8), handle logout
+    if (item.id === 8) {
+      handleLogout()
+    }
+  }
 
   const renderLink = (item: SideNavItem, inMobileView: boolean = false) => {
     const linkContent = (
@@ -33,20 +51,20 @@ const DashboardSide = () => {
         <span className="mr-3">{item.icon}</span>
         <span className="font-normal">{item.title}</span>
       </div>
-    );
+    )
 
     if (item.id === 8) {
       return inMobileView ? (
         <SheetClose key={item.id} asChild>
-          <div onClick={() => handleLinkClick(item)}>
+          <div onClick={() => handleLinkClick(item)} className="cursor-pointer">
             {linkContent}
           </div>
         </SheetClose>
       ) : (
-        <div key={item.id} onClick={() => handleLinkClick(item)}>
+        <div key={item.id} onClick={() => handleLinkClick(item)} className="cursor-pointer">
           {linkContent}
         </div>
-      );
+      )
     }
 
     // Regular navigation link
@@ -75,8 +93,8 @@ const DashboardSide = () => {
           <span className="font-normal">{item.title}</span>
         </Link>
       </div>
-    );
-  };
+    )
+  }
 
   return (
     <div>
