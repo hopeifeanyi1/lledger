@@ -1,3 +1,4 @@
+// ChatInterface.tsx (replacing the original)
 'use client';
 import React, { useState, useRef, useEffect } from "react";
 import { SendIcon } from "./Icon";
@@ -6,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { LoaderCircle, Briefcase, BookOpen, Award, Pencil, X, Check, Mic, Volume2, AudioLines, StopCircle } from "lucide-react";
 import { useVoiceService } from "./VoiceService";
+import { motion, AnimatePresence } from "framer-motion";
 
 const ChatInterface = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -200,12 +202,24 @@ const ChatInterface = () => {
     }, [router]);
   
     if (loading) {
-      return <div className="flex items-center justify-center h-screen">Loading...</div>;
+      return (
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex items-center justify-center h-screen"
+        >
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          >
+            <LoaderCircle className="h-8 w-8 text-[#D1376A]" />
+          </motion.div>
+        </motion.div>
+      );
     }
   
     const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
   
-
   // Suggested career-related questions
   const suggestedQuestions = [
     "Help me decide between two job offers",
@@ -214,22 +228,71 @@ const ChatInterface = () => {
     "What factors should I weigh for a career change?"
   ];
 
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.4 } }
+  };
+
+  const formVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+  };
+
+  const messageVariants = {
+    initial: { opacity: 0, y: 10, scale: 0.98 },
+    animate: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.4 } },
+    exit: { opacity: 0, transition: { duration: 0.2 } }
+  };
 
   return (
-    <div className="w-full h-full flex flex-col bg-transparent">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.6 }}
+      className="w-full h-full flex flex-col bg-transparent"
+    >
       <div className="relative lg:rounded-2xl flex-1 text-foreground w-full lg:w-[85%] mx-0 lg:mx-auto flex flex-col lg:h-[calc(100dvh-120px)] overflow-scroll bg-transparent">        
         <div className="flex-1 space-y-4 lg:px-4 px-3 overflow-x-hidden lg:pt-3 pt-[55px]">
           {messages.length === 0 ? (
-            <div className="flex flex-col h-full items-center justify-center gap-6">
-              <div className="text-center">
-                <h3 className="md:text-xl text-lg font-medium mb-2">Hey {userName?.split(" ")[0]}, ready to think through something today?</h3>
-                <p className="md:text-[16px] text-md">I&apos;m your thought partner to help you make better decisions and learn from past ones.</p>
-              </div>
+            <motion.div 
+              variants={containerVariants}
+              initial="hidden"
+              animate="show"
+              className="flex flex-col h-full items-center justify-center gap-6"
+            >
+              <motion.div variants={itemVariants} className="text-center">
+                <motion.h3 
+                  variants={itemVariants}
+                  className="md:text-xl text-lg font-medium mb-2"
+                >
+                  Hey {userName?.split(" ")[0]}, ready to think through something today?
+                </motion.h3>
+                <motion.p variants={itemVariants} className="md:text-[16px] text-md">
+                  I&apos;m your thought partner to help you make better decisions and learn from past ones.
+                </motion.p>
+              </motion.div>
               
-              <div className="grid md:grid-cols-2 grid-cols-1 gap-3 w-full max-w-2xl px-4">
+              <motion.div 
+                variants={containerVariants}
+                className="grid md:grid-cols-2 grid-cols-1 gap-3 w-full max-w-2xl px-4"
+              >
                 {suggestedQuestions.map((question, index) => (
-                  <button
+                  <motion.button
                     key={index}
+                    variants={itemVariants}
+                    whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
+                    whileTap={{ scale: 0.98 }}
                     className="bg-secondary hover:bg-foreground/20 text-left px-4 py-3 rounded-lg text-sm flex items-start transition-colors"
                     onClick={() => {
                       if (textAreaRef.current) {
@@ -248,97 +311,142 @@ const ChatInterface = () => {
                       {index === 3 && <Award className="h-4 w-4 text-orange-500" />}
                     </div>
                     <span>{question}</span>
-                  </button>
+                  </motion.button>
                 ))}
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           ) : (
-            messages.map((m) => (
-              <div 
-                key={m.id} 
-                className={`flex text-sm mb-10 ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div className={`lg:max-w-[80%] max-w-[87%] ${
-                  m.role === 'user' 
-                    ? 'bg-[#E0E0E0] dark:bg-neutral-600 relative' 
-                    : 'relative bg-[#D1376A]/25'
-                } ${
-                    m.role === 'user' 
-                      ? (m.content.length > 22 ? 'rounded-t-[25px] rounded-bl-[25px]' : 'rounded-t-full rounded-bl-full')
-                      : (m.content.length > 22 ? 'rounded-t-[25px] rounded-br-[25px]' : 'rounded-t-full rounded-br-full')
-                  } px-4 lg:px-5 lg:py-3.5 py-2`}>
-                  {m.role === 'user' && editingMessageId !== m.id && (
-                    <button 
-                      onClick={() => handleEditStart(m.id, m.content)}
-                      className="absolute right-[2px] bottom-[-30px] transform -translate-y-1/2"
-                      aria-label="Edit message"
-                    >
-                      <Pencil className="h-4 w-4 text-muted-foreground" />
-                    </button>
-                  )}
-                  
-                  {m.role === 'assistant' && (
-                    <button
-                      className="absolute -left-8 top-1/2 transform -translate-y-1/2"
-                      aria-label="Play response"
-                    >
-                      <Volume2 className="h-4 w-4 text-muted-foreground" />
-                    </button>
-                  )}
-                  
-                  {editingMessageId === m.id ? (
-                    <div className="flex flex-col whitespace-pre-wrap space-y-2 w-full">
-                      <textarea
-                        ref={editTextAreaRef}
-                        value={editingContent}
-                        onChange={(e) => setEditingContent(e.target.value)}
-                        className="w-full bg-transparent resize-none outline-none"
-                        rows={1}
-                      />
-                      <div className="flex justify-end space-x-2">
-                        <button 
-                          onClick={handleEditCancel}
-                          className="p-1 rounded-full hover:bg-secondary"
-                          aria-label="Cancel edit"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                        <button 
-                          onClick={handleEditSubmit}
-                          className="p-1 rounded-full hover:bg-secondary"
-                          aria-label="Submit edit"
-                        >
-                          <Check className="h-4 w-4" />
-                        </button>
+            <AnimatePresence initial={false}>
+              {messages.map((m) => (
+                <motion.div 
+                  key={m.id} 
+                  variants={messageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  layout
+                  className={`flex text-sm mb-10 ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <motion.div 
+                    layout
+                    className={`lg:max-w-[80%] max-w-[87%] ${
+                      m.role === 'user' 
+                        ? 'bg-[#E0E0E0] dark:bg-neutral-600 relative' 
+                        : 'relative bg-[#D1376A]/25'
+                    } ${
+                        m.role === 'user' 
+                          ? (m.content.length > 22 ? 'rounded-t-[25px] rounded-bl-[25px]' : 'rounded-t-full rounded-bl-full')
+                          : (m.content.length > 22 ? 'rounded-t-[25px] rounded-br-[25px]' : 'rounded-t-full rounded-br-full')
+                      } px-4 lg:px-5 lg:py-3.5 py-2`}
+                  >
+                    {m.role === 'user' && editingMessageId !== m.id && (
+                      <motion.button 
+                        initial={{ opacity: 0 }}
+                        whileHover={{ opacity: 1 }}
+                        onClick={() => handleEditStart(m.id, m.content)}
+                        className="absolute right-[2px] bottom-[-30px] transform -translate-y-1/2"
+                        aria-label="Edit message"
+                      >
+                        <Pencil className="h-4 w-4 text-muted-foreground" />
+                      </motion.button>
+                    )}
+                    
+                    {m.role === 'assistant' && (
+                      <motion.button
+                        initial={{ opacity: 0 }}
+                        whileHover={{ opacity: 1 }}
+                        className="absolute -left-8 top-1/2 transform -translate-y-1/2"
+                        aria-label="Play response"
+                      >
+                        <Volume2 className="h-4 w-4 text-muted-foreground" />
+                      </motion.button>
+                    )}
+                    
+                    {editingMessageId === m.id ? (
+                      <div className="flex flex-col whitespace-pre-wrap space-y-2 w-full">
+                        <textarea
+                          ref={editTextAreaRef}
+                          value={editingContent}
+                          onChange={(e) => setEditingContent(e.target.value)}
+                          className="w-full bg-transparent resize-none outline-none"
+                          rows={1}
+                        />
+                        <div className="flex justify-end space-x-2">
+                          <motion.button 
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={handleEditCancel}
+                            className="p-1 rounded-full hover:bg-secondary"
+                            aria-label="Cancel edit"
+                          >
+                            <X className="h-4 w-4" />
+                          </motion.button>
+                          <motion.button 
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={handleEditSubmit}
+                            className="p-1 rounded-full hover:bg-secondary"
+                            aria-label="Submit edit"
+                          >
+                            <Check className="h-4 w-4" />
+                          </motion.button>
+                        </div>
                       </div>
-                    </div>
-                  ) : (
-                    <div className="text-md whitespace-pre-wrap">
-                      {m.content}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))
+                    ) : (
+                      <div className="text-md whitespace-pre-wrap">
+                        {m.content}
+                      </div>
+                    )}
+                  </motion.div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
           )}
           
           {showTyping && (
-            <div className="text-sm flex pl-4">
-              <div className="bg-secondary-foreground rounded-full w-[10px] h-[10px] mr-[8px] animate-pulse delay-0"/>
-              <div className="bg-secondary-foreground rounded-full w-[10px] h-[10px] mr-[8px] animate-pulse delay-200"/>
-              <div className="bg-secondary-foreground rounded-full w-[10px] h-[10px] animate-pulse delay-400"/>
-            </div>
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="text-sm flex pl-4"
+            >
+              <motion.div 
+                initial={{ scale: 0.8 }}
+                animate={{ scale: [0.8, 1.2, 0.8] }}
+                transition={{ repeat: Infinity, duration: 1.5, delay: 0 }}
+                className="bg-secondary-foreground rounded-full w-[10px] h-[10px] mr-[8px]"
+              />
+              <motion.div 
+                initial={{ scale: 0.8 }}
+                animate={{ scale: [0.8, 1.2, 0.8] }}
+                transition={{ repeat: Infinity, duration: 1.5, delay: 0.2 }}
+                className="bg-secondary-foreground rounded-full w-[10px] h-[10px] mr-[8px]"
+              />
+              <motion.div 
+                initial={{ scale: 0.8 }}
+                animate={{ scale: [0.8, 1.2, 0.8] }}
+                transition={{ repeat: Infinity, duration: 1.5, delay: 0.4 }}
+                className="bg-secondary-foreground rounded-full w-[10px] h-[10px]"
+              />
+            </motion.div>
           )}
 
           {error && (
-            <div className="text-red-500 p-2 rounded bg-red-100">
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-red-500 p-2 rounded bg-red-100"
+            >
               {error.message}
-            </div>
+            </motion.div>
           )}
           <div ref={messagesEndRef} />
         </div>
 
-        <form 
+        <motion.form 
+          variants={formVariants}
+          initial="hidden"
+          animate="show"
           onSubmit={handleFormSubmit} 
           className={`flex items-end border border-secondary-foreground/30 bg-white text-black lg:w-[70%] w-[100%] px-4 py-1.5 min-h-[52px] transition-all duration-300 mx-auto my-1.5 ${isExpanded ? "rounded-2xl" : "rounded-full"}`}
         >
@@ -352,7 +460,9 @@ const ChatInterface = () => {
             disabled={isLoading || voiceService.isRecording || voiceService.isProcessingVoice}
           />
 
-        <button
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             type="button"
             onClick={voiceService.isRecording ? voiceService.stopRecording : voiceService.startRecording}
             className={`rounded-full w-10 h-10 flex items-center justify-center shrink-0 mr-2 bg-[#D1376A] ${isExpanded ? "" : "my-auto"} ${
@@ -363,28 +473,40 @@ const ChatInterface = () => {
             {voiceService.isRecording ? (
               <StopCircle className="w-5 h-5 text-white" />
             ) : voiceService.isProcessingVoice ? (
-              <LoaderCircle className="w-5 h-5 text-white animate-spin" />
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              >
+                <LoaderCircle className="w-5 h-5 text-white" />
+              </motion.div>
             ) : (
               <Mic className="w-5 h-5 text-white" />
             )}
-        </button>
+          </motion.button>
 
-          <button 
+          <motion.button 
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             type="submit" 
             className={`bg-black rounded-full w-10 h-10 flex items-center justify-center shrink-0 ${isExpanded ? "" : "my-auto"} transition-colors`}
           >
             {isLoading ? (
-              <div className="animate-spin text-white text-xl"><LoaderCircle className="w-4 h-4"/></div>
+              <motion.div 
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                className="text-white text-xl"
+              >
+                <LoaderCircle className="w-4 h-4"/>
+              </motion.div>
             ) : input.trim() === '' ? (
               <AudioLines className="w-5 h-5 text-white" />
             ) : (
               <SendIcon className="w-5 h-5 text-white" />
             )}
-          </button>
-        </form>
-        
+          </motion.button>
+        </motion.form>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
