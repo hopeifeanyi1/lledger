@@ -133,9 +133,9 @@ const DecisionCard: React.FC<DecisionCardProps> = ({ decision, index }) => {
         scale: 1.05, 
         boxShadow: "0px 10px 20px rgba(0, 0, 0, 0.1)"
       }}
-      className=''
+      className='rounded-xl'
     >
-      <Card className="h-48 w-full sm:w-[145px] relative overflow-hidden my-2 mx-auto sm:ml-2">
+      <Card className="h-48 w-full relative overflow-hidden my-2 mx-auto  ">
         <motion.div 
           className={`absolute top-0 right-0 px-2 py-1 text-xs font-medium rounded-bl-md ${getOutcomeStyles(decision.outcome)}`}
           initial={{ x: 50 }}
