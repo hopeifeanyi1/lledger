@@ -512,20 +512,8 @@ const OverviewPage = () => {
                               ))}
                             </CarouselContent>
                             <div className="flex justify-center mt-2 sm:mt-4">
-                              <motion.div
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.95 }}
-                                transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                              >
-                                <CarouselPrevious className="mr-1" />
-                              </motion.div>
-                              <motion.div
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.95 }}
-                                transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                              >
-                                <CarouselNext />
-                              </motion.div>
+                              <CarouselPrevious className="mr-1" />
+                              <CarouselNext />
                             </div>
                           </Carousel>
                         </CardContent>
