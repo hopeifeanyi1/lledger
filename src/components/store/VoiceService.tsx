@@ -1,6 +1,6 @@
-// src/components/store/VoiceServices.tsx
 'use client';
 import { useRef, useState, useEffect } from 'react';
+import { toast } from 'sonner';
 
 interface VoiceServiceProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -115,6 +115,7 @@ export const useVoiceService = ({ messages, setMessages, input, handleInputChang
           console.log("Chunks collected:", chunksRef.current.length);
           if (chunksRef.current.length === 0) {
             console.error("No audio data collected");
+            toast.error("No audio data was recorded. Please try again.");
             setIsProcessingVoice(false);
             return;
           }
@@ -137,6 +138,7 @@ export const useVoiceService = ({ messages, setMessages, input, handleInputChang
           if (!response.ok) {
             const errorText = await response.text();
             console.error(`Server returned ${response.status}: ${errorText}`);
+            toast.error(`Error processing audio: ${response.status} ${response.statusText}`);
             throw new Error(`Server error: ${response.status}`);
           }
           
@@ -149,6 +151,7 @@ export const useVoiceService = ({ messages, setMessages, input, handleInputChang
             result = JSON.parse(responseText);
           } catch (jsonError) {
             console.error("Invalid JSON response:", jsonError);
+            toast.error("Received invalid response from server");
             
             // Try to extract valid JSON if possible
             const jsonMatch = responseText.match(/(\{[\s\S]*\})/g);
@@ -157,9 +160,11 @@ export const useVoiceService = ({ messages, setMessages, input, handleInputChang
                 result = JSON.parse(jsonMatch[0]);
               } catch (extractError) {
                 console.error("Failed to extract JSON:", extractError);
+                toast.error("Failed to process server response");
                 throw new Error("Server returned invalid response format");
               }
             } else {
+              toast.error("Server returned invalid response format");
               throw new Error("Server returned invalid response format");
             }
           }
@@ -172,11 +177,11 @@ export const useVoiceService = ({ messages, setMessages, input, handleInputChang
             handleInputChange(syntheticEvent);
             localStorage.setItem('lastInteractionWasVoice', 'true');
           } else {
-            alert("Sorry, I couldn't understand what you said. Please try again.");
+            toast.error("Sorry, I couldn't understand what you said. Please try again.");
           }
         } catch (error) {
           console.error("Error processing voice:", error);
-          alert("Error processing your voice input. Please try again.");
+          toast.error("Error processing your voice input. Please try again.");
         } finally {
           setIsProcessingVoice(false);
         }
@@ -188,7 +193,7 @@ export const useVoiceService = ({ messages, setMessages, input, handleInputChang
       
     } catch (error) {
       console.error("Error accessing microphone:", error);
-      alert("Could not access your microphone. Please check your browser permissions.");
+      toast.error("Could not access your microphone. Please check your browser permissions.");
     }
   };
   
@@ -300,6 +305,7 @@ export const useVoiceService = ({ messages, setMessages, input, handleInputChang
           // Make sure the blob is not empty
           if (audioBlob.size === 0) {
             console.error("Empty audio blob created");
+            toast.error("No audio was captured. Please try speaking again.");
             setVoiceChatStatus('idle');
             setTimeout(() => {
               if (isVoiceChatActive) {
@@ -325,6 +331,7 @@ export const useVoiceService = ({ messages, setMessages, input, handleInputChang
           if (!response.ok) {
             const errorText = await response.text();
             console.error(`Server error (${response.status}): ${errorText}`);
+            toast.error(`Speech recognition failed: ${response.status} ${response.statusText}`);
             
             // Parse the error response if possible
             let errorResponse;
@@ -356,6 +363,7 @@ export const useVoiceService = ({ messages, setMessages, input, handleInputChang
             result = JSON.parse(responseText);
           } catch (jsonError) {
             console.error("Invalid JSON response:", jsonError);
+            toast.error("Failed to process speech recognition result");
             
             if (isVoiceChatActive) {
               const errorMessage = "I couldn't process your speech. Let's try again.";
@@ -411,6 +419,7 @@ export const useVoiceService = ({ messages, setMessages, input, handleInputChang
                 }
               } catch (chatError) {
                 console.error("Error getting chat response:", chatError);
+                toast.error("Failed to get response from AI");
                 
                 if (isVoiceChatActive) {
                   const errorMessage = "I had trouble processing your question. Let's try again.";
@@ -423,6 +432,7 @@ export const useVoiceService = ({ messages, setMessages, input, handleInputChang
             }
           } else {
             console.warn("No transcribed text returned or empty text");
+            toast.error("Speech not recognized. Please try again.");
             
             if (isVoiceChatActive) {
               const errorMessage = "I didn't catch what you said. Could you please speak again?";
@@ -434,6 +444,7 @@ export const useVoiceService = ({ messages, setMessages, input, handleInputChang
           }
         } catch (error) {
           console.error("Error in voice chat processing:", error);
+          toast.error("Voice chat processing error");
           
           if (isVoiceChatActive) {
             const errorMessage = "Sorry, I encountered an error. Let's try again.";
@@ -456,6 +467,7 @@ export const useVoiceService = ({ messages, setMessages, input, handleInputChang
       
     } catch (error) {
       console.error("Error accessing microphone for voice chat:", error);
+      toast.error("Microphone access failed. Check browser permissions.");
       setVoiceChatStatus('idle');
       
       const errorMessage = "I couldn't access your microphone. Please check your browser permissions.";
@@ -501,6 +513,7 @@ export const useVoiceService = ({ messages, setMessages, input, handleInputChang
         audioRef.current.src = audioUrl;
         await audioRef.current.play().catch(err => {
           console.error("Error playing audio:", err);
+          toast.error("Failed to play audio response");
           setIsPlayingResponse(false);
           
           if (isVoiceChatActive) {
@@ -513,6 +526,7 @@ export const useVoiceService = ({ messages, setMessages, input, handleInputChang
       }
     } catch (error) {
       console.error("Error converting text to speech:", error);
+      toast.error("Text-to-speech conversion failed");
       setIsPlayingResponse(false);
       
       if (isVoiceChatActive) {
@@ -529,6 +543,8 @@ export const useVoiceService = ({ messages, setMessages, input, handleInputChang
     if (assistantMessages.length > 0) {
       const latestResponse = assistantMessages[assistantMessages.length - 1].content;
       convertTextToSpeech(latestResponse);
+    } else {
+      toast.error("No assistant messages available to play");
     }
   };
   

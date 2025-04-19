@@ -8,7 +8,7 @@ import { Bars } from './Icon'
 import { Sheet, SheetContent, SheetClose, SheetTrigger, SheetHeader, SheetTitle } from "../ui/sheet"
 import { SideNavItem } from '@/types'
 import { supabase } from '@/lib/supabase'
-
+import { toast } from "sonner" 
 const DashboardSide = () => {
   const pathname = usePathname()
   const router = useRouter()
@@ -25,12 +25,18 @@ const DashboardSide = () => {
   const handleLogout = async () => {
     try {
       const { error } = await supabase.auth.signOut()
-      if (error) throw error
+      if (error) {
+        // Display error with sonner toast
+        toast.error(error.message || "Failed to log out")
+        return
+      }
       
       // Redirect to login page after successful logout
       router.push('/login')
     } catch (error) {
+      // Handle any unexpected errors
       console.error('Error logging out:', error)
+      toast.error("Something went wrong while logging out")
     }
   }
 

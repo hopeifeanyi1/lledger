@@ -7,6 +7,7 @@ import Logo from '@/components/store/Logo';
 import { Mail } from 'lucide-react';
 import { Google } from '@/components/store/Icon';
 import { supabase } from '@/lib/supabase';
+import { toast } from "sonner";
 
 const SignupPage = () => {
   const [email, setEmail] = useState('');
@@ -14,17 +15,15 @@ const SignupPage = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const router = useRouter();
 
   const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
 
     // Check if passwords match
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      toast.error('Passwords do not match');
       setLoading(false);
       return;
     }
@@ -47,7 +46,7 @@ const SignupPage = () => {
       }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      setError(error.message || 'Failed to sign up');
+      toast.error(error.message || 'Failed to sign up');
     } finally {
       setLoading(false);
     }
@@ -67,7 +66,7 @@ const SignupPage = () => {
       }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      setError(error.message || 'Failed to sign up with Google');
+      toast.error(error.message || 'Failed to sign up with Google');
     }
   };
 
@@ -75,17 +74,18 @@ const SignupPage = () => {
     setShowPassword(!showPassword);
   };
 
-    useEffect(() => {
-        const checkUser = async () => {
-        const { data } = await supabase.auth.getSession();
-        
-        if (data.session) {
-            router.push('/overview');
-        }
-        };
-    
-        checkUser();
-    }, [router]);
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data } = await supabase.auth.getSession();
+      
+      if (data.session) {
+        router.push('/overview');
+      }
+    };
+  
+    checkUser();
+  }, [router]);
+
   return (
     <div className='bg-white text-black px-4 sm:px-6 md:px-[8vw] flex flex-col md:flex-row justify-between lg:space-x-14 min-h-screen md:h-screen items-center py-8 md:py-0'>
       <div className='hidden md:block'>
@@ -99,8 +99,6 @@ const SignupPage = () => {
         
         <h1 className='text-xl md:text-2xl font-semibold mb-1 md:mb-1.5'>Create an Account</h1>
         <p className='text-black/80 text-sm md:text-md mb-4 md:mb-6'>Select method to sign up</p>
-        
-        {error && <div className='mb-4 text-sm text-red-500'>{error}</div>}
         
         <div className='mb-4 md:mb-6'>
           <button 

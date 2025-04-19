@@ -1,4 +1,3 @@
-// ChatInterface.tsx (replacing the original)
 'use client';
 import React, { useState, useRef, useEffect } from "react";
 import { SendIcon } from "./Icon";
@@ -8,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { LoaderCircle, Briefcase, BookOpen, Award, Pencil, X, Check, Mic, Volume2, AudioLines, StopCircle } from "lucide-react";
 import { useVoiceService } from "./VoiceService";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 
 const ChatInterface = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -36,8 +36,16 @@ const ChatInterface = () => {
     api: '/api/chat',
     onError: (err) => {
       console.error('Chat Error:', err);
+      toast.error(err.message || 'An error occurred during the chat');
     }
   });
+
+  // Display toast error when error state changes
+  useEffect(() => {
+    if (error) {
+      toast.error(error.message || 'An error occurred');
+    }
+  }, [error]);
 
   const voiceService = useVoiceService({
     messages,
@@ -165,6 +173,9 @@ const ChatInterface = () => {
         
         reload({
           data: { messages: jsonSafeMessages }
+        }).catch(err => {
+          toast.error('Failed to reload messages');
+          console.error(err);
         });
       }, 100);
     }
@@ -172,15 +183,21 @@ const ChatInterface = () => {
 
   useEffect(() => {
       const checkUser = async () => {
-        const { data, error } = await supabase.auth.getSession();
-        
-        if (error || !data.session) {
+        try {
+          const { data, error } = await supabase.auth.getSession();
+          
+          if (error || !data.session) {
+            router.push('/login');
+            return;
+          }
+    
+          setUser(data.session.user);
+          setLoading(false);
+        } catch (err) {
+          toast.error('Authentication error');
+          console.error('Auth error:', err);
           router.push('/login');
-          return;
         }
-  
-        setUser(data.session.user);
-        setLoading(false);
       };
   
       checkUser();
@@ -431,15 +448,6 @@ const ChatInterface = () => {
             </motion.div>
           )}
 
-          {error && (
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-red-500 p-2 rounded bg-red-100"
-            >
-              {error.message}
-            </motion.div>
-          )}
           <div ref={messagesEndRef} />
         </div>
 

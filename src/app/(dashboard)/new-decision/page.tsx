@@ -147,7 +147,7 @@ const NewDecisionPage = () => {
               whileTap={{ scale: 0.98 }}
             >
               <motion.div
-                animate={{ rotate: showCategories ? 180 : 0 }}
+                animate={{ rotate: showCategories ? 0 : 180 }}
                 transition={{ type: "spring", stiffness: 300, damping: 25 }}
               >
                 <ArrowDown className="transition" />

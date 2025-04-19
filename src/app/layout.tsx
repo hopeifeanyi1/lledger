@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
 import { ThemeProvider } from "@/components/store/ThemeProvider";
+import { Providers } from "./providers";
 
 
 const geistSans = Geist({
@@ -42,13 +43,15 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} `}
       >
-        <ThemeProvider>
-          {children}
-        </ThemeProvider>
-        <Script src="/worker-registration.ts" 
-          strategy="afterInteractive" 
-          id="service-worker-registration" 
-        />
+        <Providers>
+          <ThemeProvider>
+            {children}
+          </ThemeProvider>
+          <Script src="/worker-registration.ts" 
+            strategy="afterInteractive" 
+            id="service-worker-registration" 
+          />
+        </Providers>
       </body>
     </html>
   );

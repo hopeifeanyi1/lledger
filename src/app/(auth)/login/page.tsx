@@ -7,19 +7,18 @@ import Logo from '@/components/store/Logo';
 import { Mail } from 'lucide-react';
 import { Google } from '@/components/store/Icon';
 import { supabase } from '@/lib/supabase';
+import { toast } from "sonner";
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const router = useRouter();
 
   const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -36,13 +35,13 @@ const LoginPage = () => {
       }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      setError(error.message || 'Failed to login');
+      toast.error(error.message || 'Failed to login');
     } finally {
       setLoading(false);
     }
   };
 
-    useEffect(() => {
+  useEffect(() => {
     const checkUser = async () => {
       const { data } = await supabase.auth.getSession();
       
@@ -53,6 +52,7 @@ const LoginPage = () => {
   
     checkUser();
   }, [router]);
+
   const handleGoogleLogin = async () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -67,7 +67,7 @@ const LoginPage = () => {
       }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      setError(error.message || 'Failed to login with Google');
+      toast.error(error.message || 'Failed to login with Google');
     }
   };
 
@@ -88,8 +88,6 @@ const LoginPage = () => {
         
         <h1 className='text-xl md:text-2xl font-semibold mb-1 md:mb-1.5'>Log in to your Account</h1>
         <p className='text-black/80 text-sm md:text-md mb-4 md:mb-10'>Welcome back, Select method to login</p>
-        
-        {error && <div className='mb-4 text-sm text-red-500'>{error}</div>}
         
         <div className='mb-4 md:mb-10'>
           <button 
