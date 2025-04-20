@@ -1,7 +1,6 @@
 // components/data-table.tsx
 "use client"
 import * as React from "react"
-import { useState } from "react"
 import { Search, PlusIcon } from "lucide-react"
 import { ColumnDef, ColumnFiltersState, SortingState, VisibilityState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
@@ -31,8 +30,6 @@ export function DataTable<TData, TValue>({
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = React.useState({})
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [isMobileSearchVisible, setIsMobileSearchVisible] = useState(false)
   
     const table = useReactTable({
       data,
@@ -101,20 +98,20 @@ export function DataTable<TData, TValue>({
 
   return (
     <motion.div 
-      className="text-foreground container mx-auto px-4 pt-10"
+      className="text-foreground container mx-auto lg:px-4 px-0 pt-10"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
     >
         {/* Header Section */}
         <motion.div 
-          className="flex justify-between items-center mb-8"
+          className="lg:flex justify-between items-center lg:mb-8 mb-4"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
           <motion.h1 
-            className="lg:text-4xl text-3xl font-semibold"
+            className="text-4xl font-semibold text-center lg:text-left mb-6 lg:mb-0"
             variants={itemVariants}
           >
             Your <motion.span 
@@ -124,10 +121,11 @@ export function DataTable<TData, TValue>({
               transition={{ delay: 0.5, duration: 0.8 }}
             >Decisions Log</motion.span>
           </motion.h1>
-          <Link href="/new-decision">
+          <Link href="/new-decision" className="">
             <motion.div
               whileHover="hover"
               variants={buttonHoverVariants}
+              className="rounded-full lg:block flex justify-end mr-6 lg:mr-0"
             >
               <Button className="bg-[#D1376A] hover:bg-[#b32e5a] text-white flex items-center gap-2 px-6 py-5 rounded-full">
                 <PlusIcon size={20} />
@@ -151,7 +149,7 @@ export function DataTable<TData, TValue>({
             <Input
               type="text"
               placeholder="Search Decisions....."
-              className="pl-10 py-6 bg-gray-100 dark:bg-gray-800 rounded-lg w-full"
+              className="pl-10 py-6 bg-gray-100 dark:bg-gray-800 rounded-lg lg:w-full w-[90vw]"
               value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
               onChange={(event) =>
                 table.getColumn("title")?.setFilterValue(event.target.value)
@@ -173,7 +171,7 @@ export function DataTable<TData, TValue>({
               <Select onValueChange={(value) => 
                 table.getColumn("status")?.setFilterValue(value !== "all" ? value : undefined)
               }>
-                <SelectTrigger className="w-32 md:w-40 bg-rose-100 rounded-lg">
+                <SelectTrigger className="w-[27vw] md:w-40 bg-rose-100 rounded-lg">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -189,7 +187,7 @@ export function DataTable<TData, TValue>({
               <Select onValueChange={(value) => 
                 table.getColumn("category")?.setFilterValue(value !== "all" ? value : undefined)
               }>
-                <SelectTrigger className="w-32 md:w-40 bg-rose-100 rounded-lg">
+                <SelectTrigger className="w-[27vw] md:w-40 bg-rose-100 rounded-lg">
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
                 <SelectContent>
@@ -205,8 +203,8 @@ export function DataTable<TData, TValue>({
             <motion.div variants={itemVariants}>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-32 md:w-40 bg-rose-100 text-foreground border-none rounded-lg flex justify-between">
-                    <span>Columns</span>
+                  <Button variant="outline" className="w-[27vw] md:w-40 bg-rose-100 text-foreground/60 border-none rounded-lg flex justify-between">
+                    <span className="">Columns</span>
                     <span className="ml-2">▼</span>
                   </Button>
                 </DropdownMenuTrigger>
@@ -238,7 +236,7 @@ export function DataTable<TData, TValue>({
 
         {/* Table Section */}
         <motion.div 
-          className="overflow-x-scroll rounded-lg shadow w-full"
+          className="overflow-x-scroll rounded-xl shadow lg:w-full w-[calc(100vw-15px)]"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ 
@@ -247,7 +245,7 @@ export function DataTable<TData, TValue>({
             ease: [0.25, 0.1, 0.25, 1]
           }}
         >
-          <Table>
+          <Table className="">
             <TableHeader className="bg-[#D1376A] text-white">
               {table.getHeaderGroups().map((headerGroup) => (
                 <motion.tr
@@ -275,13 +273,12 @@ export function DataTable<TData, TValue>({
                   <motion.tr
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
-                    className="border-b border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
+                    className="border-b border-gray-200 cursor-pointer"
                     custom={index}
                     variants={tableRowVariants}
                     initial="hidden"
                     animate="visible"
                     whileHover={{ 
-                      backgroundColor: "rgba(249, 250, 251, 1)", 
                       scale: 1.01,
                       transition: { duration: 0.2 }
                     }}
@@ -321,7 +318,7 @@ export function DataTable<TData, TValue>({
           </motion.div>
           
           <motion.div 
-            className="flex items-center space-x-2"
+            className="flex items-center lg:space-x-2 space-x-4"
             variants={itemVariants}
           >
             <Button

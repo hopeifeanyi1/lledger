@@ -26,15 +26,12 @@ const DashboardSide = () => {
     try {
       const { error } = await supabase.auth.signOut()
       if (error) {
-        // Display error with sonner toast
+        
         toast.error(error.message || "Failed to log out")
         return
       }
-      
-      // Redirect to login page after successful logout
       router.push('/login')
     } catch (error) {
-      // Handle any unexpected errors
       console.error('Error logging out:', error)
       toast.error("Something went wrong while logging out")
     }
@@ -43,8 +40,7 @@ const DashboardSide = () => {
   const handleLinkClick = (item: SideNavItem) => {
     setIsSheetOpen(false)
     
-    // If this is the logout item (id 8), handle logout
-    if (item.id === 8) {
+    if (item.id === 6) {
       handleLogout()
     }
   }
@@ -143,7 +139,7 @@ const DashboardSide = () => {
                 </div>
               </nav>
             </div>
-            <div className="mt-auto">
+            <div className="mt-auto pb-7">
               <div className="pt-9 mt-7 border-t border-border">
                 <nav className="flex-1 flex flex-col justify-between">
                   <div className="flex flex-col space-y-6">
