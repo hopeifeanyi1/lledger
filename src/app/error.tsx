@@ -15,15 +15,15 @@ export default function Error({
   }, [error]);
 
   return (
-    <div>
+    <div className=''>
     <main className=" md:pt-14 lg:pt-32">
-      <section className='bg-white'>
-        <div className='layout flex flex-col h-[50dvh] items-center justify-center text-center text-black'>
+      <section className=''>
+        <div className='layout flex flex-col h-[50dvh] items-center justify-center text-center  text-foreground '>
           
           <h1 className='md:mt-8 mt-24 text-3xl md:text-6xl'>
             Oops, something went wrong!
           </h1>
-          <TextButton variant='basic' onClick={reset} className='mt-4'>
+          <TextButton variant='basic' onClick={reset} className='mt-4 text-foreground'>
             Try again
           </TextButton>
         </div>

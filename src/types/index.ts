@@ -12,3 +12,12 @@ export type SideNavItem = {
   submenu?: boolean;
   subItems?: SideNavItem[];
   }
+
+  export type DecisionData = {
+    id: number;
+    title: string;
+    status: string;
+    category: string;
+    dateCreated: string;
+    finalOutcome: string;
+  }

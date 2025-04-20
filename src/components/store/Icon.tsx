@@ -15,6 +15,14 @@ export const ArrowDown : React.FC<IconProps> = ({className}) => {
 
     );
   };
+  export const Search : React.FC<IconProps> = ({className}) => {
+    return (
+      <svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <path d="M11 19.1113C15.4183 19.1113 19 15.5296 19 11.1113C19 6.69305 15.4183 3.11133 11 3.11133C6.58172 3.11133 3 6.69305 3 11.1113C3 15.5296 6.58172 19.1113 11 19.1113Z" stroke="#7E8083" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M20.9992 21.1105L16.6992 16.8105" stroke="#7E8083" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>           
+    );
+  };
   export const SendIcon : React.FC<IconProps> = ({className}) => {
     return (
         <svg width="76" height="76" viewBox="0 0 76 76" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
