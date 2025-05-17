@@ -33,10 +33,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <meta name="application-name" content="Easy Therapy" />
+        <meta name="application-name" content="Life Ledger" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="Easy Therapy" />
+        <meta name="apple-mobile-web-app-title" content="Life Ledger" />
         <meta name="theme-color" content="#4f46e5" />
        
       </head>
